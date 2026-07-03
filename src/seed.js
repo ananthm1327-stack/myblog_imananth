@@ -2,7 +2,36 @@
 // doesn't feel empty. Runs once per browser (guarded by a flag).
 // Delete the flag key `ia_seeded` from localStorage to re-seed.
 
-const SEED_FLAG = 'ia_seeded_v1'
+const SEED_FLAG = 'ia_seeded_v2'
+
+// Default tag suggestions per section (applied to any seed post without tags).
+const DEFAULT_TAGS = {
+  journal:     ['reflection'],
+  photos:      ['photography'],
+  experiences: ['story'],
+  articles:    ['essay'],
+  views:       ['opinion']
+}
+
+// Per-title tag hints for a bit of variety without editing every seed by hand.
+const TITLE_TAGS = {
+  'A slow Sunday':                     ['slow-living', 'coffee'],
+  'Late night, half thoughts':         ['notes', 'insomnia'],
+  'Morning fog, somewhere north':      ['landscape', 'travel'],
+  'The sea does not care':             ['ocean', 'stillness'],
+  'Between two buildings':             ['street', 'city'],
+  'City after rain':                   ['city', 'weather'],
+  'A week without a phone':            ['digital-detox', 'books'],
+  'Learning to cook, badly':           ['humor', 'home'],
+  'A road trip with no plan':          ['travel', 'freedom'],
+  'Why I keep a paper notebook':       ['tools', 'writing'],
+  'The overrated art of the hot take': ['media', 'thinking'],
+  'On working alone vs. working with people': ['work', 'collaboration'],
+  'AI is not the villain in your story':      ['ai', 'technology'],
+  'Cities are for walking':            ['cities', 'walking'],
+  'Books over podcasts, most of the time':    ['books', 'media'],
+  'The best productivity advice is boring':   ['productivity', 'health']
+}
 
 const iso = (daysAgo) => {
   const d = new Date()
@@ -31,6 +60,8 @@ const SEED = {
       title: 'On starting again',
       body: `There's a particular kind of quiet that comes with beginning something new. Not the loud, celebratory kind — the small, private one. This morning I opened a blank page and just sat with it for a while.\n\nI've been thinking about how much of life is spent not on the doing, but on the getting-ready-to-do. I want to spend less time preparing and more time just being here.`,
       image: '',
+      tags: ['reflection', 'beginnings'],
+      status: 'published',
       createdAt: iso(2)
     },
     {
@@ -136,14 +167,41 @@ const SEED = {
   ]
 }
 
+function decorate(sectionKey, post) {
+  return {
+    ...post,
+    status: post.status || 'published',
+    tags: post.tags && post.tags.length
+      ? post.tags
+      : (TITLE_TAGS[post.title] || DEFAULT_TAGS[sectionKey] || [])
+  }
+}
+
+// Migrate existing localStorage posts to have status + tags fields
+// so v1-seeded users get the new features without losing their data.
+function migrateExisting() {
+  Object.keys(SEED).forEach(section => {
+    const key = `ia_${section}`
+    try {
+      const raw = localStorage.getItem(key)
+      if (!raw) return
+      const items = JSON.parse(raw)
+      const migrated = items.map(p => decorate(section, p))
+      localStorage.setItem(key, JSON.stringify(migrated))
+    } catch { /* ignore */ }
+  })
+}
+
 export function seedIfEmpty() {
+  // Always run migration on load — cheap, idempotent, covers old seed data.
+  migrateExisting()
   if (localStorage.getItem(SEED_FLAG)) return
   Object.entries(SEED).forEach(([key, items]) => {
     const storageKey = `ia_${key}`
-    // Only seed if the section is currently empty — don't overwrite user posts.
     const existing = localStorage.getItem(storageKey)
     if (!existing || existing === '[]') {
-      localStorage.setItem(storageKey, JSON.stringify(items))
+      const withDefaults = items.map(p => decorate(key, p))
+      localStorage.setItem(storageKey, JSON.stringify(withDefaults))
     }
   })
   localStorage.setItem(SEED_FLAG, '1')

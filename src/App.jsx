@@ -4,8 +4,9 @@ import Home from './pages/Home.jsx'
 import Section from './pages/Section.jsx'
 import PostDetail from './pages/PostDetail.jsx'
 import Contact from './pages/Contact.jsx'
+import Moderation from './pages/Moderation.jsx'
 import Footer from './components/Footer.jsx'
-import { isOwner, login, logout } from './store.js'
+import { isOwner, login, logout, pendingComments } from './store.js'
 
 const SECTIONS = [
   { key: 'journal', label: 'Journal' },
@@ -103,6 +104,9 @@ function MobileNav({ open, onClose }) {
             <NavLink key={s.key} to={`/${s.key}`} onClick={onClose}>{s.label}</NavLink>
           ))}
           <NavLink to="/contact" onClick={onClose}>Contact</NavLink>
+          {isOwner() && (
+            <NavLink to="/moderation" onClick={onClose}>Moderation</NavLink>
+          )}
           <div className="nav-drawer-divider" />
           <div className="nav-drawer-owner"><OwnerToggle /></div>
         </nav>
@@ -135,6 +139,11 @@ export default function App() {
             <NavLink key={s.key} to={`/${s.key}`}>{s.label}</NavLink>
           ))}
           <NavLink to="/contact">Contact</NavLink>
+          {isOwner() && (
+            <NavLink to="/moderation" className="nav-mod-link">
+              Mod {pendingComments().length > 0 && <span className="nav-mod-pill">{pendingComments().length}</span>}
+            </NavLink>
+          )}
           <OwnerToggle />
         </div>
         <button
@@ -158,6 +167,7 @@ export default function App() {
             <Route key={s.key + '-d'} path={`/${s.key}/:id`} element={<PostDetail sectionKey={s.key} label={s.label} />} />
           ))}
           <Route path="/contact" element={<Contact />} />
+          <Route path="/moderation" element={<Moderation />} />
         </Routes>
       </main>
 
