@@ -4,6 +4,7 @@ import Home from './pages/Home.jsx'
 import Section from './pages/Section.jsx'
 import PostDetail from './pages/PostDetail.jsx'
 import Contact from './pages/Contact.jsx'
+import About from './pages/About.jsx'
 import Moderation from './pages/Moderation.jsx'
 import Footer from './components/Footer.jsx'
 import { isOwner, login, logout, pendingComments } from './store.js'
@@ -103,6 +104,7 @@ function MobileNav({ open, onClose }) {
           {SECTIONS.map(s => (
             <NavLink key={s.key} to={`/${s.key}`} onClick={onClose}>{s.label}</NavLink>
           ))}
+          <NavLink to="/about" onClick={onClose}>About</NavLink>
           <NavLink to="/contact" onClick={onClose}>Contact</NavLink>
           {isOwner() && (
             <NavLink to="/moderation" onClick={onClose}>Moderation</NavLink>
@@ -138,6 +140,7 @@ export default function App() {
           {SECTIONS.map(s => (
             <NavLink key={s.key} to={`/${s.key}`}>{s.label}</NavLink>
           ))}
+          <NavLink to="/about">About</NavLink>
           <NavLink to="/contact">Contact</NavLink>
           {isOwner() && (
             <NavLink to="/moderation" className="nav-mod-link">
@@ -167,6 +170,7 @@ export default function App() {
             <Route key={s.key + '-d'} path={`/${s.key}/:id`} element={<PostDetail sectionKey={s.key} label={s.label} />} />
           ))}
           <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<About />} />
           <Route path="/moderation" element={<Moderation />} />
         </Routes>
       </main>

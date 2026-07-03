@@ -173,13 +173,22 @@ function esc(str) {
     .replace(/"/g, '&quot;')
 }
 
+function htmlToPlain(html) {
+  if (!html) return ''
+  try {
+    const el = document.createElement('div')
+    el.innerHTML = html
+    return el.textContent || ''
+  } catch { return String(html) }
+}
+
 export function generateRSS(sectionKey, label, siteUrl = SITE_URL) {
   const items = load(sectionKey).filter(p => (p.status || 'published') === 'published')
   const now = new Date().toUTCString()
   const rssItems = items.map(p => {
-    const desc = (p.body || '').slice(0, 500)
+    const desc = htmlToPlain(p.body).slice(0, 500)
     return `    <item>
-      <title>${esc(p.title)}</title>
+      <title>${esc(htmlToPlain(p.title))}</title>
       <link>${siteUrl}/${sectionKey}/${p.id}</link>
       <guid isPermaLink="false">${sectionKey}-${p.id}</guid>
       <pubDate>${new Date(p.createdAt).toUTCString()}</pubDate>

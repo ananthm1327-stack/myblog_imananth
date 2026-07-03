@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { pendingComments, moderateComment, isOwner, formatDate } from '../store.js'
+import { Page } from '../components/Decor.jsx'
 
 export default function Moderation() {
   const [rev, setRev] = useState(0)
@@ -8,10 +9,12 @@ export default function Moderation() {
 
   if (!owner) {
     return (
-      <div className="post-detail">
-        <h1>Moderation</h1>
-        <p style={{ color: 'var(--titanium)' }}>You need to sign in as owner to see this page.</p>
-      </div>
+      <Page label="Moderation">
+        <div className="post-detail">
+          <h1>Moderation</h1>
+          <p style={{ color: 'var(--titanium)' }}>You need to sign in as owner to see this page.</p>
+        </div>
+      </Page>
     )
   }
 
@@ -19,7 +22,7 @@ export default function Moderation() {
   const act = (c, action) => { moderateComment(c.sectionKey, c.postId, c.id, action); setRev(x => x + 1) }
 
   return (
-    <>
+    <Page label="Moderation">
       <div className="section-header">
         <h2>Moderation Queue</h2>
         <span className="meta" style={{ margin: 0 }}>{pending.length} pending</span>
@@ -47,6 +50,6 @@ export default function Moderation() {
           ))}
         </ul>
       )}
-    </>
+    </Page>
   )
 }

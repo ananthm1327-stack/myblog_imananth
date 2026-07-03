@@ -109,6 +109,7 @@ export default function Footer() {
             <ul className="footer-links">
               <li><Link to="/">Home</Link></li>
               {SECTIONS.map(s => <li key={s.key}><Link to={`/${s.key}`}>{s.label}</Link></li>)}
+              <li><Link to="/about">About Ananth</Link></li>
               <li><Link to="/contact">Contact</Link></li>
             </ul>
           </div>

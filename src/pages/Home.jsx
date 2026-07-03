@@ -1,5 +1,10 @@
+import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import { load, formatDate } from '../store.js'
+import { ClosingFlourish } from '../components/Decor.jsx'
+import { stripHtml } from '../lib/sanitize.js'
+
+const ROMAN = ['I', 'II', 'III', 'IV', 'V']
 
 export default function Home({ sections }) {
   return (
@@ -29,31 +34,36 @@ export default function Home({ sections }) {
         </div>
       </section>
 
-      {sections.map(s => {
+      {sections.map((s, i) => {
         const items = load(s.key).slice(0, 3)
         return (
-          <section key={s.key} style={{ marginBottom: 50 }}>
-            <div className="section-header">
-              <h2>{s.label}</h2>
-              <Link to={`/${s.key}`} style={{ color: 'var(--gold-deep)', fontSize: 13, letterSpacing: 2, textTransform: 'uppercase' }}>View all &rarr;</Link>
-            </div>
-            {items.length === 0 ? (
-              <div className="empty">Nothing here yet.</div>
-            ) : (
-              <div className="grid">
-                {items.map(p => (
-                  <Link key={p.id} to={`/${s.key}/${p.id}`} className="card">
-                    {p.image && <img src={p.image} alt="" />}
-                    <div className="meta">{formatDate(p.createdAt)}</div>
-                    <h3>{p.title}</h3>
-                    <p>{(p.body || p.caption || '').slice(0, 120)}{(p.body || p.caption || '').length > 120 ? '…' : ''}</p>
-                  </Link>
-                ))}
+          <Fragment key={s.key}>
+            <section className="home-section">
+              <span className="chapter-numeral" aria-hidden="true">{ROMAN[i]}</span>
+              <span className="section-watermark" aria-hidden="true">{s.label}</span>
+              <div className="section-header">
+                <h2>{s.label}</h2>
+                <Link to={`/${s.key}`} style={{ color: 'var(--gold-deep)', fontSize: 13, letterSpacing: 2, textTransform: 'uppercase' }}>View all &rarr;</Link>
               </div>
-            )}
-          </section>
+              {items.length === 0 ? (
+                <div className="empty">Nothing here yet.</div>
+              ) : (
+                <div className="grid">
+                  {items.map(p => (
+                    <Link key={p.id} to={`/${s.key}/${p.id}`} className="card">
+                      {p.image && <img src={p.image} alt="" />}
+                      <div className="meta">{formatDate(p.createdAt)}</div>
+                      <h3 dangerouslySetInnerHTML={{ __html: stripHtml(p.title) }} />
+                      <p>{stripHtml(p.body || p.caption || '').slice(0, 120)}{stripHtml(p.body || p.caption || '').length > 120 ? '…' : ''}</p>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </section>
+          </Fragment>
         )
       })}
+      <ClosingFlourish />
     </>
   )
 }

@@ -30,8 +30,12 @@ export default function Lightbox({ items, index, onClose, onIndex }) {
         <img src={current.image} alt={current.title || ''} className="lb-img" />
         {(current.title || current.body) && (
           <figcaption className="lb-caption">
-            {current.title && <div className="lb-title">{current.title}</div>}
-            {current.body && <div className="lb-body">{current.body}</div>}
+            {current.title && (
+              <div className="lb-title" dangerouslySetInnerHTML={{ __html: current.title }} />
+            )}
+            {current.body && (
+              <div className="lb-body rt-content" dangerouslySetInnerHTML={{ __html: current.body }} />
+            )}
             <div className="lb-count">{index + 1} / {items.length}</div>
           </figcaption>
         )}

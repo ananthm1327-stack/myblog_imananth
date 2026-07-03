@@ -5,6 +5,11 @@ import {
   normalizeTags, generateRSS
 } from '../store.js'
 import Lightbox from '../components/Lightbox.jsx'
+import RichText from '../components/RichText.jsx'
+import { Page } from '../components/Decor.jsx'
+import { stripHtml } from '../lib/sanitize.js'
+
+const SECTION_NUMERAL = { journal: 'I', photos: 'II', experiences: 'III', articles: 'IV', views: 'V' }
 
 export default function Section({ sectionKey, label }) {
   const [rev, setRev] = useState(0)
@@ -49,7 +54,7 @@ export default function Section({ sectionKey, label }) {
   const closeLightbox = () => setLbIndex(-1)
 
   return (
-    <>
+    <Page label={label} numeral={SECTION_NUMERAL[sectionKey]}>
       <div className="section-header">
         <div>
           <h2>{label}</h2>
@@ -87,11 +92,11 @@ export default function Section({ sectionKey, label }) {
           <div className="photo-grid">
             {items.map((p, i) => (
               <div key={p.id} className="photo" style={{ position: 'relative' }}>
-                <button className="photo-btn" onClick={() => openLightbox(i)} aria-label={p.title || 'Photo'}>
-                  <img src={p.image} alt={p.title || ''} />
+                <button className="photo-btn" onClick={() => openLightbox(i)} aria-label={stripHtml(p.title) || 'Photo'}>
+                  <img src={p.image} alt={stripHtml(p.title) || ''} />
                 </button>
                 <div className="photo-caption">
-                  {p.title}
+                  <span dangerouslySetInnerHTML={{ __html: stripHtml(p.title) }} />
                   {p.status === 'draft' && <span className="badge-draft"> DRAFT</span>}
                 </div>
                 {owner && (
@@ -130,8 +135,8 @@ export default function Section({ sectionKey, label }) {
                     {formatDate(p.createdAt)}
                     {p.status === 'draft' && <span className="badge-draft">DRAFT</span>}
                   </div>
-                  <h3>{p.title}</h3>
-                  <p>{(p.body || '').slice(0, 140)}{(p.body || '').length > 140 ? '…' : ''}</p>
+                  <h3 dangerouslySetInnerHTML={{ __html: stripHtml(p.title) }} />
+                  <p>{stripHtml(p.body || '').slice(0, 140)}{stripHtml(p.body || '').length > 140 ? '…' : ''}</p>
                 </Link>
                 {(p.tags || []).length > 0 && (
                   <div className="tag-row">
@@ -166,7 +171,7 @@ export default function Section({ sectionKey, label }) {
           onSaved={() => { refresh(); setShowForm(false); setEditing(null) }}
         />
       )}
-    </>
+    </Page>
   )
 }
 
@@ -187,7 +192,7 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
 
   const submit = (e) => {
     e.preventDefault()
-    if (!title.trim()) return
+    if (!stripHtml(title).trim()) return
     if (isPhotos && !image) { alert('Please choose a photo.'); return }
     const patch = {
       title,
@@ -211,12 +216,22 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
         <h2>{existing ? 'Edit Post' : 'New Post'}</h2>
         <form className="form" onSubmit={submit}>
           <label>Title</label>
-          <input value={title} onChange={e => setTitle(e.target.value)} required />
+          <RichText
+            value={title}
+            onChange={setTitle}
+            placeholder="Post title"
+            singleLine
+          />
 
           {!isPhotos && (
             <>
               <label>Body</label>
-              <textarea value={body} onChange={e => setBody(e.target.value)} placeholder="Write your thoughts…" />
+              <RichText
+                value={body}
+                onChange={setBody}
+                placeholder="Write your thoughts…"
+                minHeight={220}
+              />
             </>
           )}
 
@@ -227,7 +242,12 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
           {isPhotos && (
             <>
               <label>Caption (optional)</label>
-              <textarea value={body} onChange={e => setBody(e.target.value)} />
+              <RichText
+                value={body}
+                onChange={setBody}
+                placeholder="Caption…"
+                minHeight={120}
+              />
             </>
           )}
 
