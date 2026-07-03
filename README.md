@@ -117,7 +117,7 @@ Publishing is restricted so only Ananth can add or delete posts.
 1. Click **Sign In** in the navbar → the restricted-access modal appears (centered, blurred backdrop, gold lock icon).
 2. Enter the owner password. Default is set in `src/store.js`:
    ```js
-   export const OWNER_PASSWORD = 'ananth2026'
+   export const OWNER_PASSWORD = 'xxxxxxxxxx'
    ```
    **Change this before deploying.** The password is a client-side gate — anyone determined enough to look at the bundle can find it. It's intended to keep casual readers from posting, not to protect against a real attacker.
 3. Once signed in, a **+ New** button appears in each section and delete buttons appear on cards + post detail pages.
