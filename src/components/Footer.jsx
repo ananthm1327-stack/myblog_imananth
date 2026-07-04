@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { toast } from '../lib/toast.js'
 
 const OWNER_EMAIL = 'ananth.machiraju@outlook.com'
 const SUBSCRIBE_ENDPOINT = `https://formsubmit.co/${OWNER_EMAIL}`
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const SECTIONS = [
   { key: 'journal', label: 'Journal' },
@@ -46,30 +48,50 @@ const SOCIALS = [
 function Subscribe() {
   const [status, setStatus] = useState(null)
   const [sending, setSending] = useState(false)
+  const [invalid, setInvalid] = useState(false)
 
   const onSubmit = async (e) => {
     e.preventDefault()
-    setSending(true); setStatus(null)
     const form = e.target
     const data = new FormData(form)
+    const email = String(data.get('email') || '').trim()
+
+    if (!EMAIL_RE.test(email)) {
+      setInvalid(true)
+      setStatus({ ok: false, msg: 'Please enter a valid email address.' })
+      toast.error('That email address doesn\'t look right.')
+      return
+    }
+    setInvalid(false)
+    setSending(true); setStatus(null)
     try {
       const res = await fetch(SUBSCRIBE_ENDPOINT, {
         method: 'POST', body: data, headers: { Accept: 'application/json' }
       })
-      if (res.ok) { setStatus({ ok: true, msg: 'You\'re on the list. Thank you.' }); form.reset() }
-      else setStatus({ ok: false, msg: 'Something went wrong. Try again?' })
-    } catch { setStatus({ ok: false, msg: 'Network error. Try again?' }) }
+      if (res.ok) {
+        setStatus({ ok: true, msg: 'You\'re on the list. Thank you.' })
+        toast.success('Subscribed — welcome aboard.')
+        form.reset()
+      } else {
+        setStatus({ ok: false, msg: 'Something went wrong. Try again?' })
+        toast.error('Could not subscribe. Please try again.')
+      }
+    } catch {
+      setStatus({ ok: false, msg: 'Network error. Try again?' })
+      toast.error('Network error — please try again.')
+    }
     finally { setSending(false) }
   }
 
   return (
-    <form className="sub-form" onSubmit={onSubmit}>
+    <form className="sub-form" onSubmit={onSubmit} noValidate>
       <input type="hidden" name="_subject" value="New subscriber — I'm Ananth" />
       <input type="hidden" name="_captcha" value="false" />
       <input type="hidden" name="_template" value="table" />
       <input type="hidden" name="intent" value="subscribe" />
-      <div className="sub-row">
-        <input type="email" name="email" placeholder="you@somewhere.com" required aria-label="Email" />
+      <div className={`sub-row ${invalid ? 'has-error' : ''}`}>
+        <input type="email" name="email" placeholder="you@somewhere.com" aria-label="Email"
+          onChange={() => invalid && setInvalid(false)} />
         <button type="submit" disabled={sending}>{sending ? '…' : 'Subscribe'}</button>
       </div>
       {status && <div className={`sub-status ${status.ok ? 'ok' : 'err'}`}>{status.msg}</div>}

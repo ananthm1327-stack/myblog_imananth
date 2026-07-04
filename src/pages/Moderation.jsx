@@ -5,6 +5,7 @@ import { isSupabaseEnabled, backendStatus } from '../lib/supabase.js'
 import { pullAll } from '../lib/sync.js'
 import { useLiveData } from '../lib/bus.js'
 import { Page } from '../components/Decor.jsx'
+import { toast } from '../lib/toast.js'
 
 export default function Moderation() {
   useLiveData()
@@ -17,8 +18,13 @@ export default function Moderation() {
     setSyncing(true); setSyncMsg(null)
     const res = await pullAll()
     setSyncing(false)
-    if (res.ok) setSyncMsg({ ok: true, msg: `Pulled ${res.postCount} posts, ${res.commentCount} comments.` })
-    else setSyncMsg({ ok: false, msg: 'Pull failed: ' + res.reason })
+    if (res.ok) {
+      setSyncMsg({ ok: true, msg: `Pulled ${res.postCount} posts, ${res.commentCount} comments.` })
+      toast.success('Backend synced.')
+    } else {
+      setSyncMsg({ ok: false, msg: 'Pull failed: ' + res.reason })
+      toast.error('Pull failed: ' + res.reason)
+    }
     setRev(x => x + 1)
     setTimeout(() => setSyncMsg(null), 5000)
   }
@@ -35,7 +41,11 @@ export default function Moderation() {
   }
 
   const pending = pendingComments()
-  const act = (c, action) => { moderateComment(c.sectionKey, c.postId, c.id, action); setRev(x => x + 1) }
+  const act = (c, action) => {
+    moderateComment(c.sectionKey, c.postId, c.id, action)
+    setRev(x => x + 1)
+    toast.success(action === 'approve' ? 'Comment approved.' : 'Comment deleted.')
+  }
 
   const downloadSitemap = () => {
     const xml = generateSitemap(window.location.origin)

@@ -5,6 +5,7 @@ import { Page } from '../components/Decor.jsx'
 import { stripHtml } from '../lib/sanitize.js'
 import Meta from '../components/Meta.jsx'
 import { useLiveData } from '../lib/bus.js'
+import { toast } from '../lib/toast.js'
 
 export default function Bookmarks() {
   useLiveData()
@@ -14,6 +15,7 @@ export default function Bookmarks() {
   const removeBookmark = (sectionKey, id) => {
     toggleBookmark(sectionKey, id)
     setRev(x => x + 1)
+    toast.info('Removed from bookmarks.')
   }
 
   return (

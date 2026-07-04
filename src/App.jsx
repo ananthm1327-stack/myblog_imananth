@@ -11,7 +11,11 @@ import Bookmarks from './pages/Bookmarks.jsx'
 import Footer from './components/Footer.jsx'
 import Meta from './components/Meta.jsx'
 import SearchOverlay from './components/SearchOverlay.jsx'
+import Preloader from './components/Preloader.jsx'
+import CookieConsent from './components/CookieConsent.jsx'
+import ToastHost from './components/ToastHost.jsx'
 import { isOwner, login, logout, pendingComments } from './store.js'
+import { toast } from './lib/toast.js'
 
 const SECTIONS = [
   { key: 'journal', label: 'Journal' },
@@ -31,7 +35,7 @@ function OwnerToggle() {
 
   if (owner) {
     return (
-      <Link to="#" onClick={(e) => { e.preventDefault(); logout(); force(x => x+1); }}>Sign Out</Link>
+      <Link to="#" onClick={(e) => { e.preventDefault(); logout(); force(x => x+1); toast.info('Signed out.') }}>Sign Out</Link>
     )
   }
   return (
@@ -55,8 +59,9 @@ function OwnerToggle() {
             </p>
             <form className="signin-form" onSubmit={(e) => {
               e.preventDefault()
-              if (login(pw)) { setShowModal(false); force(x => x+1); }
-              else setErr('Incorrect password. Access denied.')
+              if (!pw.trim()) { setErr('Please enter the owner password.'); return }
+              if (login(pw)) { setShowModal(false); force(x => x+1); toast.success('Signed in as owner.') }
+              else { setErr('Incorrect password. Access denied.'); toast.error('Incorrect password.') }
             }}>
               <label htmlFor="signin-pw" className="signin-label">Owner Password</label>
               <input
@@ -139,6 +144,9 @@ export default function App() {
 
   return (
     <div className="app">
+      <Preloader />
+      <ToastHost />
+      <CookieConsent delay={3400} />
       <Meta />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
       <div className="site-bg" aria-hidden="true">
@@ -179,8 +187,8 @@ export default function App() {
             </svg>
           </button>
           <NavLink to="/bookmarks" className="nav-icon-btn nav-icon-link" aria-label="Bookmarks" title="Bookmarks">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 4h12v17l-6-4-6 4V4z" />
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" fillOpacity="0.16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6.5 4.5h11a1 1 0 0 1 1 1v14.2l-6.5-4.3-6.5 4.3V5.5a1 1 0 0 1 1-1z" />
             </svg>
           </NavLink>
           <OwnerToggle />

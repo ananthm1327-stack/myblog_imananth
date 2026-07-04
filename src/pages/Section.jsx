@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   load, loadVisible, addPost, deletePost, updatePost, isOwner, formatDate,
@@ -9,6 +10,7 @@ import RichText from '../components/RichText.jsx'
 import { Page } from '../components/Decor.jsx'
 import { stripHtml } from '../lib/sanitize.js'
 import { useLiveData } from '../lib/bus.js'
+import { toast } from '../lib/toast.js'
 
 const SECTION_NUMERAL = { journal: 'I', photos: 'II', experiences: 'III', articles: 'IV', views: 'V' }
 
@@ -33,11 +35,17 @@ export default function Section({ sectionKey, label }) {
   const draftItems = items.filter(p => p.status === 'draft')
 
   const onDelete = (id) => {
-    if (confirm('Delete this post?')) { deletePost(sectionKey, id); refresh() }
+    if (confirm('Delete this post?')) {
+      deletePost(sectionKey, id)
+      refresh()
+      toast.success('Post deleted.')
+    }
   }
   const togglePublish = (post) => {
-    updatePost(sectionKey, post.id, { status: post.status === 'draft' ? 'published' : 'draft' })
+    const next = post.status === 'draft' ? 'published' : 'draft'
+    updatePost(sectionKey, post.id, { status: next })
     refresh()
+    toast.success(next === 'published' ? 'Post published.' : 'Moved to drafts.')
   }
   const clearTag = () => { params.delete('tag'); setParams(params) }
 
@@ -198,19 +206,43 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
   const [tags, setTags] = useState((existing?.tags || []).join(', '))
   const [status, setStatus] = useState(existing?.status || 'published')
   const [publishAt, setPublishAt] = useState(toLocalInput(existing?.publishAt))
+  const [fieldErrors, setFieldErrors] = useState({})
 
   const onFile = (e) => {
     const f = e.target.files?.[0]
     if (!f) return
+    if (!f.type.startsWith('image/')) {
+      toast.error('That file isn\'t an image. Please choose a JPG, PNG, or WebP.')
+      return
+    }
+    if (f.size > 6 * 1024 * 1024) {
+      toast.error('Image is too large (max 6MB). Try a smaller file.')
+      return
+    }
     const reader = new FileReader()
     reader.onload = () => setImage(reader.result)
     reader.readAsDataURL(f)
   }
 
+  const validate = () => {
+    const errors = {}
+    if (!stripHtml(title).trim()) errors.title = 'A title is required.'
+    if (isPhotos && !image) errors.image = 'Please choose a photo.'
+    if (publishAt) {
+      const t = fromLocalInput(publishAt)
+      if (!t) errors.publishAt = 'That date doesn\'t look valid.'
+    }
+    return errors
+  }
+
   const submit = (e) => {
     e.preventDefault()
-    if (!stripHtml(title).trim()) return
-    if (isPhotos && !image) { alert('Please choose a photo.'); return }
+    const errors = validate()
+    setFieldErrors(errors)
+    if (Object.keys(errors).length > 0) {
+      toast.error(Object.values(errors)[0])
+      return
+    }
     const patch = {
       title,
       body,
@@ -221,18 +253,20 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
     }
     if (existing) {
       updatePost(sectionKey, existing.id, patch)
+      toast.success('Post updated.')
     } else {
       addPost(sectionKey, patch)
+      toast.success(status === 'draft' ? 'Draft saved.' : 'Post published.')
     }
     onSaved()
   }
 
-  return (
+  return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose}>&times;</button>
         <h2>{existing ? 'Edit Post' : 'New Post'}</h2>
-        <form className="form" onSubmit={submit}>
+        <form className="form" onSubmit={submit} noValidate>
           <label>Title</label>
           <RichText
             value={title}
@@ -240,6 +274,7 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
             placeholder="Post title"
             singleLine
           />
+          {fieldErrors.title && <div className="field-error">{fieldErrors.title}</div>}
 
           {!isPhotos && (
             <>
@@ -255,6 +290,7 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
 
           <label>{isPhotos ? 'Photo' : 'Image (optional)'}</label>
           <input type="file" accept="image/*" onChange={onFile} />
+          {fieldErrors.image && <div className="field-error">{fieldErrors.image}</div>}
           {image && <img src={image} alt="" style={{ maxWidth: '100%', marginTop: 12 }} />}
 
           {isPhotos && (
@@ -296,6 +332,7 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
                 value={publishAt}
                 onChange={e => setPublishAt(e.target.value)}
               />
+              {fieldErrors.publishAt && <div className="field-error">{fieldErrors.publishAt}</div>}
               {publishAt && fromLocalInput(publishAt) && new Date(publishAt).getTime() > Date.now() && (
                 <div className="scheduled-hint">
                   Will go live on {new Date(publishAt).toLocaleString()}
@@ -309,6 +346,7 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
           </button>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

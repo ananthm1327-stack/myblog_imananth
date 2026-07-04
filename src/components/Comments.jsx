@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { loadComments, addComment, moderateComment, isOwner, formatDate, toggleReaction, hasReacted } from '../store.js'
+import { toast } from '../lib/toast.js'
 
 export default function Comments({ sectionKey, postId }) {
   const owner = isOwner()
@@ -7,6 +8,7 @@ export default function Comments({ sectionKey, postId }) {
   const [name, setName] = useState('')
   const [body, setBody] = useState('')
   const [status, setStatus] = useState(null)
+  const [fieldErrors, setFieldErrors] = useState({})
 
   const approved = loadComments(sectionKey, postId)
   const all = owner ? loadComments(sectionKey, postId, { includePending: true }) : approved
@@ -15,10 +17,18 @@ export default function Comments({ sectionKey, postId }) {
 
   const submit = (e) => {
     e.preventDefault()
-    if (!name.trim() || !body.trim()) return
-    addComment(sectionKey, postId, { name, body })
-    setName(''); setBody('')
+    const errors = {}
+    if (name.trim().length < 2) errors.name = 'Please enter your name (at least 2 characters).'
+    if (body.trim().length < 3) errors.body = 'Your comment is too short.'
+    setFieldErrors(errors)
+    if (Object.keys(errors).length > 0) {
+      toast.error(Object.values(errors)[0])
+      return
+    }
+    addComment(sectionKey, postId, { name: name.trim(), body: body.trim() })
+    setName(''); setBody(''); setFieldErrors({})
     setStatus({ ok: true, msg: 'Thanks — your comment is awaiting review by Ananth.' })
+    toast.success('Comment submitted — awaiting review.')
     setRefresh(x => x + 1)
     setTimeout(() => setStatus(null), 4000)
   }
@@ -26,6 +36,7 @@ export default function Comments({ sectionKey, postId }) {
   const moderate = (id, action) => {
     moderateComment(sectionKey, postId, id, action)
     setRefresh(x => x + 1)
+    toast.success(action === 'approve' ? 'Comment approved.' : 'Comment deleted.')
   }
 
   return (
@@ -82,13 +93,25 @@ export default function Comments({ sectionKey, postId }) {
         </ul>
       )}
 
-      <form className="comments-form" onSubmit={submit}>
+      <form className="comments-form" onSubmit={submit} noValidate>
         <h4>Leave a comment</h4>
         <p className="comments-note">Comments are moderated. Ananth will read yours before it appears here.</p>
         <label>Your name</label>
-        <input value={name} onChange={e => setName(e.target.value)} required maxLength={60} />
+        <input
+          value={name}
+          onChange={e => { setName(e.target.value); fieldErrors.name && setFieldErrors(f => ({ ...f, name: null })) }}
+          className={fieldErrors.name ? 'has-error' : ''}
+          maxLength={60}
+        />
+        {fieldErrors.name && <div className="field-error">{fieldErrors.name}</div>}
         <label>Your comment</label>
-        <textarea value={body} onChange={e => setBody(e.target.value)} required maxLength={2000} />
+        <textarea
+          value={body}
+          onChange={e => { setBody(e.target.value); fieldErrors.body && setFieldErrors(f => ({ ...f, body: null })) }}
+          className={fieldErrors.body ? 'has-error' : ''}
+          maxLength={2000}
+        />
+        {fieldErrors.body && <div className="field-error">{fieldErrors.body}</div>}
         <button className="btn" type="submit">Post comment</button>
         {status && <div className={`status ${status.ok ? 'ok' : 'err'}`}>{status.msg}</div>}
       </form>

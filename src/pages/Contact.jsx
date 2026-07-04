@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import { Page } from '../components/Decor.jsx'
+import { toast } from '../lib/toast.js'
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const OWNER_EMAIL = 'ananth.machiraju@outlook.com'
 // FormSubmit.co lets you receive form emails without any signup or backend.
@@ -67,14 +70,34 @@ export default function Contact() {
   const [status, setStatus] = useState(null)
   const [sending, setSending] = useState(false)
   const [topic, setTopic] = useState(TOPICS[0].value)
+  const [fieldErrors, setFieldErrors] = useState({})
   const activeTopic = TOPICS.find(t => t.value === topic) || TOPICS[0]
+
+  const validate = (data) => {
+    const errors = {}
+    const name = String(data.get('name') || '').trim()
+    const email = String(data.get('email') || '').trim()
+    const message = String(data.get('message') || '').trim()
+    if (name.length < 2) errors.name = 'Please enter your name (at least 2 characters).'
+    if (!EMAIL_RE.test(email)) errors.email = 'That doesn\'t look like a valid email address.'
+    if (message.length < 10) errors.message = 'Say a little more — at least 10 characters.'
+    return errors
+  }
 
   const onSubmit = async (e) => {
     e.preventDefault()
-    setSending(true)
-    setStatus(null)
     const form = e.target
     const data = new FormData(form)
+
+    const errors = validate(data)
+    setFieldErrors(errors)
+    if (Object.keys(errors).length > 0) {
+      toast.error(Object.values(errors)[0])
+      return
+    }
+
+    setSending(true)
+    setStatus(null)
 
     try {
       const res = await fetch(FORM_ENDPOINT, {
@@ -84,13 +107,19 @@ export default function Contact() {
       })
       if (res.ok) {
         setStatus({ ok: true, msg: 'Your message has been sent. Ananth will read every word.' })
+        toast.success('Message sent — thank you.')
         form.reset()
         setTopic(TOPICS[0].value)
+        setFieldErrors({})
       } else {
-        setStatus({ ok: false, msg: `Something went wrong. Please try again — or email ${OWNER_EMAIL} directly.` })
+        const msg = `Something went wrong. Please try again — or email ${OWNER_EMAIL} directly.`
+        setStatus({ ok: false, msg })
+        toast.error('Could not send your message. Please try again.')
       }
     } catch {
-      setStatus({ ok: false, msg: `Network error. You can also email ${OWNER_EMAIL} directly.` })
+      const msg = `Network error. You can also email ${OWNER_EMAIL} directly.`
+      setStatus({ ok: false, msg })
+      toast.error('Network error — please check your connection and try again.')
     } finally {
       setSending(false)
     }
@@ -146,7 +175,7 @@ export default function Contact() {
           </aside>
 
           {/* Right: form */}
-          <form className="ct-form" onSubmit={onSubmit}>
+          <form className="ct-form" onSubmit={onSubmit} noValidate>
             <input type="hidden" name="_subject" value="New message from I'm Ananth" />
             <input type="hidden" name="_captcha" value="false" />
             <input type="hidden" name="_template" value="table" />
@@ -154,11 +183,17 @@ export default function Contact() {
             <div className="ct-row ct-row-2">
               <div className="ct-field">
                 <label htmlFor="ct-name">Your name</label>
-                <input id="ct-name" name="name" required placeholder="What should I call you?" />
+                <input id="ct-name" name="name" placeholder="What should I call you?"
+                  className={fieldErrors.name ? 'has-error' : ''}
+                  onChange={() => fieldErrors.name && setFieldErrors(f => ({ ...f, name: null }))} />
+                {fieldErrors.name && <div className="field-error">{fieldErrors.name}</div>}
               </div>
               <div className="ct-field">
                 <label htmlFor="ct-email">Your email</label>
-                <input id="ct-email" name="email" type="email" required placeholder="you@somewhere.com" />
+                <input id="ct-email" name="email" type="email" placeholder="you@somewhere.com"
+                  className={fieldErrors.email ? 'has-error' : ''}
+                  onChange={() => fieldErrors.email && setFieldErrors(f => ({ ...f, email: null }))} />
+                {fieldErrors.email && <div className="field-error">{fieldErrors.email}</div>}
               </div>
             </div>
 
@@ -179,8 +214,11 @@ export default function Contact() {
 
             <div className="ct-field">
               <label htmlFor="ct-message">Your message</label>
-              <textarea id="ct-message" name="message" required rows={7}
+              <textarea id="ct-message" name="message" rows={7}
+                className={fieldErrors.message ? 'has-error' : ''}
+                onChange={() => fieldErrors.message && setFieldErrors(f => ({ ...f, message: null }))}
                 placeholder="Take your time. There's no character limit and no hurry." />
+              {fieldErrors.message && <div className="field-error">{fieldErrors.message}</div>}
             </div>
 
             <div className="ct-submit-row">

@@ -6,6 +6,7 @@ import { Page } from '../components/Decor.jsx'
 import Meta from '../components/Meta.jsx'
 import { sanitize, stripHtml } from '../lib/sanitize.js'
 import { useLiveData } from '../lib/bus.js'
+import { toast } from '../lib/toast.js'
 
 export default function PostDetail({ sectionKey, label }) {
   useLiveData()
@@ -60,7 +61,11 @@ export default function PostDetail({ sectionKey, label }) {
         <Link to={`/${sectionKey}`} className="back-link">&larr; Back to {label}</Link>
         <button
           className={`bookmark-btn ${bookmarked ? 'on' : ''}`}
-          onClick={() => setBookmarked(toggleBookmark(sectionKey, id))}
+          onClick={() => {
+            const next = toggleBookmark(sectionKey, id)
+            setBookmarked(next)
+            toast.info(next ? 'Saved to bookmarks.' : 'Removed from bookmarks.')
+          }}
           aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark this post'}
           title={bookmarked ? 'Bookmarked — click to remove' : 'Save for later'}
         >
@@ -105,7 +110,11 @@ export default function PostDetail({ sectionKey, label }) {
 
       {owner && (
         <button className="btn danger" onClick={() => {
-          if (confirm('Delete this post?')) { deletePost(sectionKey, id); nav(`/${sectionKey}`) }
+          if (confirm('Delete this post?')) {
+            deletePost(sectionKey, id)
+            toast.success('Post deleted.')
+            nav(`/${sectionKey}`)
+          }
         }}>Delete</button>
       )}
 
