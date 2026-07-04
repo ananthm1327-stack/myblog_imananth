@@ -39,6 +39,7 @@ alter table posts enable row level security;
 alter table comments enable row level security;
 
 -- Everyone (anon) can READ published, non-scheduled posts.
+drop policy if exists "posts_public_read" on posts;
 create policy "posts_public_read"
   on posts for select
   using (
@@ -48,6 +49,7 @@ create policy "posts_public_read"
 
 -- Anyone with the owner_token can insert/update/delete posts.
 -- The token is stored in the app's VITE_OWNER_TOKEN env var; keep it secret.
+drop policy if exists "posts_owner_all" on posts;
 create policy "posts_owner_all"
   on posts for all
   using (owner_token = current_setting('request.headers', true)::json->>'x-owner-token')
@@ -72,14 +74,17 @@ create policy "posts_owner_all"
 -- authentication boundary. The app's own isOwner() check (sessionStorage) is
 -- what actually hides the /moderation UI and the "+ New" buttons from
 -- everyday readers.
+drop policy if exists "comments_public_read" on comments;
 create policy "comments_public_read"
   on comments for select
   using (status = 'approved');
 
+drop policy if exists "comments_public_insert" on comments;
 create policy "comments_public_insert"
   on comments for insert
   with check (status = 'pending');
 
+drop policy if exists "comments_owner_all" on comments;
 create policy "comments_owner_all"
   on comments for all
   using (owner_token = current_setting('request.headers', true)::json->>'x-owner-token')
