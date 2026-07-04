@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { loadComments, addComment, moderateComment, isOwner, formatDate } from '../store.js'
+import { loadComments, addComment, moderateComment, isOwner, formatDate, toggleReaction, hasReacted } from '../store.js'
 
 export default function Comments({ sectionKey, postId }) {
   const owner = isOwner()
@@ -49,6 +49,26 @@ export default function Comments({ sectionKey, postId }) {
                 {c.status === 'pending' && <span className="comment-badge">Pending</span>}
               </div>
               <div className="comment-body">{c.body}</div>
+              {c.status !== 'pending' && (
+                <div className="reactions">
+                  <button
+                    className={`rx-btn ${hasReacted(sectionKey, postId, c.id, 'heart') ? 'on' : ''}`}
+                    onClick={() => { toggleReaction(sectionKey, postId, c.id, 'heart'); setRefresh(x => x + 1) }}
+                    aria-label="Heart this comment"
+                  >
+                    <span className="rx-glyph">&#9829;</span>
+                    <span className="rx-count">{(c.reactions?.heart) || 0}</span>
+                  </button>
+                  <button
+                    className={`rx-btn ${hasReacted(sectionKey, postId, c.id, 'sparkle') ? 'on' : ''}`}
+                    onClick={() => { toggleReaction(sectionKey, postId, c.id, 'sparkle'); setRefresh(x => x + 1) }}
+                    aria-label="Sparkle this comment"
+                  >
+                    <span className="rx-glyph">&#10022;</span>
+                    <span className="rx-count">{(c.reactions?.sparkle) || 0}</span>
+                  </button>
+                </div>
+              )}
               {owner && (
                 <div className="comment-mod">
                   {c.status === 'pending' && (

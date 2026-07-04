@@ -1,14 +1,17 @@
+import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { getPost, deletePost, isOwner, formatDate } from '../store.js'
+import { getPost, deletePost, isOwner, formatDate, isLivePost, isScheduled, isBookmarked, toggleBookmark } from '../store.js'
 import Comments from '../components/Comments.jsx'
 import { Page } from '../components/Decor.jsx'
-import { sanitize } from '../lib/sanitize.js'
+import Meta from '../components/Meta.jsx'
+import { sanitize, stripHtml } from '../lib/sanitize.js'
 
 export default function PostDetail({ sectionKey, label }) {
   const { id } = useParams()
   const nav = useNavigate()
   const post = getPost(sectionKey, id)
   const owner = isOwner()
+  const [bookmarked, setBookmarked] = useState(() => post ? isBookmarked(sectionKey, id) : false)
 
   if (!post) {
     return (
@@ -21,8 +24,8 @@ export default function PostDetail({ sectionKey, label }) {
     )
   }
 
-  // Non-owners can't see drafts directly by URL either.
-  if (post.status === 'draft' && !owner) {
+  // Non-owners can't see drafts or scheduled posts.
+  if (!isLivePost(post) && !owner) {
     return (
       <Page label={label}>
         <div className="post-detail">
@@ -33,12 +36,45 @@ export default function PostDetail({ sectionKey, label }) {
     )
   }
 
+  const scheduled = isScheduled(post)
+
   return (
     <Page label={label}>
+    <Meta
+      title={stripHtml(post.title)}
+      description={stripHtml(post.body || '').slice(0, 200)}
+      image={post.image || undefined}
+      path={`/${sectionKey}/${post.id}`}
+      type="article"
+      article={{
+        publishedTime: post.createdAt,
+        author: 'Ananth Machiraju',
+        section: label,
+        tags: post.tags || []
+      }}
+    />
     <div className="post-detail">
-      <Link to={`/${sectionKey}`} className="back-link">&larr; Back to {label}</Link>
+      <div className="post-top-row">
+        <Link to={`/${sectionKey}`} className="back-link">&larr; Back to {label}</Link>
+        <button
+          className={`bookmark-btn ${bookmarked ? 'on' : ''}`}
+          onClick={() => setBookmarked(toggleBookmark(sectionKey, id))}
+          aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark this post'}
+          title={bookmarked ? 'Bookmarked — click to remove' : 'Save for later'}
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill={bookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 4h12v17l-6-4-6 4V4z" />
+          </svg>
+          <span>{bookmarked ? 'Saved' : 'Save'}</span>
+        </button>
+      </div>
       {post.status === 'draft' && (
         <div className="draft-banner">Draft — visible only to you until you publish it.</div>
+      )}
+      {scheduled && (
+        <div className="scheduled-banner">
+          Scheduled for {new Date(post.publishAt).toLocaleString()} — hidden from readers until then.
+        </div>
       )}
       <h1 dangerouslySetInnerHTML={{ __html: sanitize(post.title) }} />
       <div className="meta">{formatDate(post.createdAt)} &middot; {label}</div>

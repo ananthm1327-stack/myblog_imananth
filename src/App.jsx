@@ -6,7 +6,10 @@ import PostDetail from './pages/PostDetail.jsx'
 import Contact from './pages/Contact.jsx'
 import About from './pages/About.jsx'
 import Moderation from './pages/Moderation.jsx'
+import Bookmarks from './pages/Bookmarks.jsx'
 import Footer from './components/Footer.jsx'
+import Meta from './components/Meta.jsx'
+import SearchOverlay from './components/SearchOverlay.jsx'
 import { isOwner, login, logout, pendingComments } from './store.js'
 
 const SECTIONS = [
@@ -106,6 +109,7 @@ function MobileNav({ open, onClose }) {
           ))}
           <NavLink to="/about" onClick={onClose}>About</NavLink>
           <NavLink to="/contact" onClick={onClose}>Contact</NavLink>
+          <NavLink to="/bookmarks" onClick={onClose}>Bookmarks</NavLink>
           {isOwner() && (
             <NavLink to="/moderation" onClick={onClose}>Moderation</NavLink>
           )}
@@ -119,8 +123,22 @@ function MobileNav({ open, onClose }) {
 
 export default function App() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+
+  useEffect(() => {
+    const onKey = (e) => {
+      const isSearchShortcut = (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA' && !document.activeElement?.isContentEditable)
+        || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k')
+      if (isSearchShortcut) { e.preventDefault(); setSearchOpen(true) }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   return (
     <div className="app">
+      <Meta />
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
       <div className="site-bg" aria-hidden="true">
         <div className="site-bg-paper" />
         <div className="site-bg-rules" />
@@ -147,6 +165,22 @@ export default function App() {
               Mod {pendingComments().length > 0 && <span className="nav-mod-pill">{pendingComments().length}</span>}
             </NavLink>
           )}
+          <button
+            type="button"
+            className="nav-icon-btn"
+            onClick={() => setSearchOpen(true)}
+            aria-label="Search (press / or Ctrl+K)"
+            title="Search — /"
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="7" /><line x1="16.5" y1="16.5" x2="21" y2="21" />
+            </svg>
+          </button>
+          <NavLink to="/bookmarks" className="nav-icon-btn nav-icon-link" aria-label="Bookmarks" title="Bookmarks">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 4h12v17l-6-4-6 4V4z" />
+            </svg>
+          </NavLink>
           <OwnerToggle />
         </div>
         <button
@@ -171,6 +205,7 @@ export default function App() {
           ))}
           <Route path="/contact" element={<Contact />} />
           <Route path="/about" element={<About />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/moderation" element={<Moderation />} />
         </Routes>
       </main>

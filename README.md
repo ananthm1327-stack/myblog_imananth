@@ -127,6 +127,50 @@ Readers do not need to sign in — everything is browsable freely.
 
 ---
 
+## Cross-device sync (optional Supabase backend)
+
+By default the app stores everything in `localStorage`, so posts only exist in the browser you posted from. To make posts + comments follow you across devices, wire in a free Supabase project — no server code required.
+
+### 1. Create the project
+
+1. Sign in at [supabase.com](https://supabase.com) and create a new project.
+2. In the SQL editor, open [`supabase/schema.sql`](supabase/schema.sql), paste the whole file, and run it.
+3. Copy your **Project URL** and the **anon public key** from Settings → API.
+
+### 2. Configure the client
+
+Copy the env template and fill in the values:
+
+```bash
+cp .env.example .env.local
+```
+
+Then edit `.env.local`:
+
+```ini
+VITE_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-public-key
+VITE_OWNER_TOKEN=a-40-char-random-string
+```
+
+The **owner token** is your write secret. Any client with this token can insert/update/delete posts and moderate comments through the anon key. Keep it out of git. `.env.local` is already gitignored.
+
+### 3. How it works
+
+- **Reads are local-first.** All pages render from `localStorage` — no waiting on the network.
+- **On boot**, the app calls `pullAll()`: fetches remote posts + comments and merges them into local storage, preferring whichever version has the newer `updated_at`.
+- **Writes are fire-and-forget.** When the owner creates/edits/deletes a post (or a reader submits a comment, or moderator approves), the local write completes instantly and the change is mirrored to Supabase in the background. Failures log to the console; they never block the UI.
+- **Backend status pill** on the `/moderation` page shows whether Supabase is connected, plus a **Pull now** button to force a refresh.
+- If the env vars are missing, `isSupabaseEnabled` is `false` and the app runs identically to the local-only build — nothing crashes.
+
+### 4. Security notes
+
+- The **anon key is public**. It's meant to be shipped to the browser. RLS policies in the schema stop anon clients from writing posts unless they include the `owner_token`.
+- The **owner token is embedded in the bundle**, so treat it as a low-value shared secret (rotate it periodically). For a hardened setup, front the mutations with a Supabase Edge Function that validates a real JWT.
+- The default policies allow anonymous read of published posts and approved comments, anonymous insert of pending comments only.
+
+---
+
 ## Content Storage
 
 Posts are stored in the browser's **localStorage** under keys `ia_journal`, `ia_photos`, `ia_experiences`, `ia_articles`, `ia_views`. Each post has:

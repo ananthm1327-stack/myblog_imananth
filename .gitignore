@@ -12,10 +12,11 @@ dist-ssr
 .DS_Store
 Thumbs.db
 
-# Env
+# Env — keep .env.example tracked, ignore real secrets
 .env
 .env.local
 .env.*.local
+!.env.example
 
 # Logs
 npm-debug.log*

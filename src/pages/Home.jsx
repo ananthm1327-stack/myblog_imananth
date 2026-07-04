@@ -1,8 +1,9 @@
 import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
-import { load, formatDate } from '../store.js'
+import { load, formatDate, isLivePost, isOwner } from '../store.js'
 import { ClosingFlourish } from '../components/Decor.jsx'
 import { stripHtml } from '../lib/sanitize.js'
+import Meta from '../components/Meta.jsx'
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V']
 
@@ -34,8 +35,10 @@ export default function Home({ sections }) {
         </div>
       </section>
 
+      <Meta />
       {sections.map((s, i) => {
-        const items = load(s.key).slice(0, 3)
+        const owner = isOwner()
+        const items = load(s.key).filter(p => owner || isLivePost(p)).slice(0, 3)
         return (
           <Fragment key={s.key}>
             <section className="home-section">

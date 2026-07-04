@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   load, loadVisible, addPost, deletePost, updatePost, isOwner, formatDate,
-  normalizeTags, generateRSS
+  normalizeTags, generateRSS, isScheduled
 } from '../store.js'
 import Lightbox from '../components/Lightbox.jsx'
 import RichText from '../components/RichText.jsx'
@@ -134,6 +134,7 @@ export default function Section({ sectionKey, label }) {
                   <div className="meta">
                     {formatDate(p.createdAt)}
                     {p.status === 'draft' && <span className="badge-draft">DRAFT</span>}
+                    {isScheduled(p) && <span className="badge-scheduled">SCHEDULED</span>}
                   </div>
                   <h3 dangerouslySetInnerHTML={{ __html: stripHtml(p.title) }} />
                   <p>{stripHtml(p.body || '').slice(0, 140)}{stripHtml(p.body || '').length > 140 ? '…' : ''}</p>
@@ -175,12 +176,26 @@ export default function Section({ sectionKey, label }) {
   )
 }
 
+function toLocalInput(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d)) return ''
+  const pad = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+function fromLocalInput(v) {
+  if (!v) return null
+  const d = new Date(v)
+  return isNaN(d) ? null : d.toISOString()
+}
+
 function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
   const [title, setTitle] = useState(existing?.title || '')
   const [body, setBody] = useState(existing?.body || '')
   const [image, setImage] = useState(existing?.image || '')
   const [tags, setTags] = useState((existing?.tags || []).join(', '))
   const [status, setStatus] = useState(existing?.status || 'published')
+  const [publishAt, setPublishAt] = useState(toLocalInput(existing?.publishAt))
 
   const onFile = (e) => {
     const f = e.target.files?.[0]
@@ -199,7 +214,8 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
       body,
       image,
       tags: normalizeTags(tags),
-      status
+      status,
+      publishAt: status === 'published' ? fromLocalInput(publishAt) : null
     }
     if (existing) {
       updatePost(sectionKey, existing.id, patch)
@@ -259,7 +275,7 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
             <label className={`toggle-opt ${status === 'published' ? 'active' : ''}`}>
               <input type="radio" name="status" value="published"
                 checked={status === 'published'} onChange={() => setStatus('published')} />
-              <span>Publish now</span>
+              <span>Publish</span>
             </label>
             <label className={`toggle-opt ${status === 'draft' ? 'active' : ''}`}>
               <input type="radio" name="status" value="draft"
@@ -267,6 +283,24 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
               <span>Save as draft</span>
             </label>
           </div>
+
+          {status === 'published' && (
+            <>
+              <label>
+                Schedule <span className="form-hint">optional — leave blank to publish now</span>
+              </label>
+              <input
+                type="datetime-local"
+                value={publishAt}
+                onChange={e => setPublishAt(e.target.value)}
+              />
+              {publishAt && fromLocalInput(publishAt) && new Date(publishAt).getTime() > Date.now() && (
+                <div className="scheduled-hint">
+                  Will go live on {new Date(publishAt).toLocaleString()}
+                </div>
+              )}
+            </>
+          )}
 
           <button className="btn" type="submit">
             {existing ? 'Save changes' : (status === 'draft' ? 'Save draft' : 'Publish')}
