@@ -16,9 +16,13 @@ export const OWNER_TOKEN = import.meta.env.VITE_OWNER_TOKEN || ''
 
 export const isSupabaseEnabled = Boolean(url && anon)
 
+// Attach the owner token to every request so RLS policies that check
+// current_setting('request.headers', true)::json->>'x-owner-token' can authenticate the writer.
+// The header is safe on reads (RLS ignores it for public policies) and gates every write.
 export const client = isSupabaseEnabled
   ? createClient(url, anon, {
-      auth: { persistSession: false, autoRefreshToken: false }
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: OWNER_TOKEN ? { headers: { 'x-owner-token': OWNER_TOKEN } } : undefined
     })
   : null
 

@@ -24,7 +24,15 @@ export const SECTIONS_META = [
 // Only whoever knows it can create/delete posts. Everyone else is read-only.
 export const OWNER_PASSWORD = 'ananth2026'
 
-export const SITE_URL = 'https://imananth.local'
+// Public URL of the site — used for canonical links, og:url, and the sitemap.
+// Resolution order:
+//   1. VITE_SITE_URL env var (set this in Vercel if you have a custom domain)
+//   2. window.location.origin at runtime (best default — always matches the current deploy)
+//   3. Fallback for build-time contexts
+export const SITE_URL = (
+  import.meta.env.VITE_SITE_URL ||
+  (typeof window !== 'undefined' ? window.location.origin : 'https://imananth.local')
+).replace(/\/$/, '')
 
 export function load(key) {
   try {
