@@ -133,6 +133,14 @@ export default function Footer() {
               {SECTIONS.map(s => <li key={s.key}><Link to={`/${s.key}`}>{s.label}</Link></li>)}
               <li><Link to="/about">About Ananth</Link></li>
               <li><Link to="/contact">Contact</Link></li>
+              <li>
+                <Link to="/bookmarks" className="footer-bookmarks-link">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" fillOpacity="0.16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M6.5 4.5h11a1 1 0 0 1 1 1v14.2l-6.5-4.3-6.5 4.3V5.5a1 1 0 0 1 1-1z" />
+                  </svg>
+                  Bookmarks
+                </Link>
+              </li>
             </ul>
           </div>
 

@@ -242,44 +242,63 @@
   pointer-events: none;
 }
 .toast {
+  position: relative;
   pointer-events: auto;
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 14px 16px;
-  background: rgba(255, 253, 247, 0.97);
+  gap: 12px;
+  padding: 14px 18px;
+  background: linear-gradient(180deg, rgba(255, 253, 247, 0.98) 0%, rgba(251, 247, 236, 0.98) 100%);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(200, 162, 75, 0.28);
   border-left: 3px solid var(--gold);
-  box-shadow: 0 12px 32px rgba(74, 79, 82, 0.16), 0 2px 8px rgba(200, 162, 75, 0.1);
+  box-shadow:
+    0 14px 36px rgba(74, 79, 82, 0.14),
+    0 2px 8px rgba(200, 162, 75, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
   cursor: pointer;
   animation: toastSlideIn .3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  overflow: hidden;
+}
+.toast::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80px 60px at 0% 0%, rgba(200, 162, 75, 0.1), transparent 70%);
+  pointer-events: none;
 }
 @keyframes toastSlideIn {
   from { opacity: 0; transform: translateX(30px); }
   to   { opacity: 1; transform: translateX(0); }
 }
-.toast-success { border-left-color: #4a9b5e; }
-.toast-error { border-left-color: #b94a4a; }
+/* All variants share the gold family — differentiated by icon glyph, not clashing colors */
+.toast-success { border-left-color: var(--gold); }
+.toast-error { border-left-color: var(--gold-deep); }
 .toast-info { border-left-color: var(--gold); }
 .toast-icon {
+  position: relative;
   flex-shrink: 0;
-  width: 22px; height: 22px;
+  width: 24px; height: 24px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 12px;
   font-weight: 700;
   color: #fff;
+  box-shadow: 0 3px 8px rgba(200, 162, 75, 0.35);
 }
-.toast-success .toast-icon { background: #4a9b5e; }
-.toast-error .toast-icon { background: #b94a4a; }
-.toast-info .toast-icon { background: var(--gold); }
+.toast-success .toast-icon { background: linear-gradient(135deg, var(--gold), var(--gold-deep)); }
+.toast-error .toast-icon { background: linear-gradient(135deg, var(--gold-deep), #8a6423); }
+.toast-info .toast-icon { background: linear-gradient(135deg, var(--gold), var(--gold-deep)); }
 .toast-msg {
+  position: relative;
   flex: 1;
   font-size: 13.5px;
   line-height: 1.5;
   color: var(--titanium-dark);
+  font-family: 'Inter', sans-serif;
 }
+.toast-error .toast-msg { color: #5a4423; }
 .toast-close {
   flex-shrink: 0;
   background: none;
@@ -3197,6 +3216,12 @@ a.ct-method:hover .ct-method-icon { background: var(--gold); color: #fff; }
 }
 .footer-links a:hover { padding-left: 6px; }
 .footer-links a { transition: color .2s, padding-left .2s; }
+.footer-bookmarks-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.footer-bookmarks-link svg { flex-shrink: 0; }
 
 .footer-sub-copy {
   font-size: 14px;

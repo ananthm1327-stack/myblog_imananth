@@ -116,7 +116,6 @@ function MobileNav({ open, onClose }) {
           ))}
           <NavLink to="/about" onClick={onClose}>About</NavLink>
           <NavLink to="/contact" onClick={onClose}>Contact</NavLink>
-          <NavLink to="/bookmarks" onClick={onClose}>Bookmarks</NavLink>
           {isOwner() && (
             <NavLink to="/moderation" onClick={onClose}>Moderation</NavLink>
           )}
@@ -186,11 +185,6 @@ export default function App() {
               <circle cx="11" cy="11" r="7" /><line x1="16.5" y1="16.5" x2="21" y2="21" />
             </svg>
           </button>
-          <NavLink to="/bookmarks" className="nav-icon-btn nav-icon-link" aria-label="Bookmarks" title="Bookmarks">
-            <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" fillOpacity="0.16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6.5 4.5h11a1 1 0 0 1 1 1v14.2l-6.5-4.3-6.5 4.3V5.5a1 1 0 0 1 1-1z" />
-            </svg>
-          </NavLink>
           <OwnerToggle />
         </div>
         <button
