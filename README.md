@@ -240,15 +240,27 @@ For SPAs, remember to add a rewrite so unknown paths fall back to `index.html` (
 
 ## Roadmap
 
-Ideas for future iterations:
+### Shipped
+
+- [x] **Comments (moderated) on articles** — readers submit via the form at the bottom of every post; comments land as *pending* in localStorage and only appear publicly once approved. Owner gets a `/moderation` queue with a red pending-count pill in the navbar.
+- [x] **RSS 2.0 feed for the Journal** — "RSS" button on the Journal section opens a well-formed feed with title, link, pubDate, description, and `<category>` entries pulled from tags.
+- [x] **Image gallery lightbox for the Photos section** — click any photo → full-screen dark backdrop with the image, caption, and "1 / N" counter. Keyboard nav: `Esc` closes, `←` / `→` navigate.
+- [x] **Draft / publish workflow** — every post has a `status` (`draft` | `published`). Owner sees drafts with a red "DRAFT" badge and a strip banner; readers never see them, and deep-linking a draft URL as a reader shows "This post isn't published yet."
+- [x] **Tag system across sections** — comma-separated tag input on the post form, gold chip UI on cards + detail pages, `?tag=<slug>` URL filter with a "Filtering by #tag · clear" bar. Also emitted as `<category>` in RSS.
+- [x] **About page** — driven from a single editable `ABOUT` object with intro, family cells, work industries, skills, website card, socials, CTA, and signature.
+- [x] **Rich-text editing** — contentEditable toolbar for post titles and bodies with Bold/Italic/Underline/Strike, H2/H3/Blockquote/P, ordered/unordered lists, links, and clear-format. Paste is auto-flattened to plain text and rendered HTML is passed through a whitelist sanitizer.
+- [x] **Page ornaments across the site** — italic Cormorant watermark of the current page label + a gold-diamond closing flourish before the footer on every non-home page (via the shared `Page` component).
+
+### Still open
 
 - [ ] Optional Firebase / Supabase backend for cross-device posts
-- [ ] Comments (moderated) on articles
-- [ ] RSS feed for the Journal
 - [ ] Dark mode
-- [ ] Image gallery lightbox for the Photos section
-- [ ] Draft / publish workflow
-- [ ] Tag system across sections
+- [ ] Post scheduling (publish at a future date)
+- [ ] Search across all sections
+- [ ] Reader-side saved / bookmarked posts
+- [ ] Reactions (♥, ✦) on comments
+- [ ] OG image + per-post meta tags for social sharing
+- [ ] Sitemap and canonical URLs
 
 ---
 
