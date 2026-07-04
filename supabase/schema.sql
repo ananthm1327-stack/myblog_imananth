@@ -63,6 +63,15 @@ create policy "posts_owner_all"
 
 -- Comments: anyone can read approved, anyone can insert (goes in as pending),
 -- only the owner can approve/delete.
+--
+-- NOTE: the app writes owner_token on every comment row (not just ones the
+-- true owner submits) so that pullAll() — which uses the same anon client for
+-- everyone — can select pending comments for the moderation queue. This is
+-- consistent with the existing model: VITE_OWNER_TOKEN is baked into the
+-- public JS bundle, so it is a "shared secret via obscurity", not a real
+-- authentication boundary. The app's own isOwner() check (sessionStorage) is
+-- what actually hides the /moderation UI and the "+ New" buttons from
+-- everyday readers.
 create policy "comments_public_read"
   on comments for select
   using (status = 'approved');
@@ -83,3 +92,23 @@ $$ language plpgsql;
 
 drop trigger if exists posts_touch on posts;
 create trigger posts_touch before update on posts for each row execute function touch_updated_at();
+
+-- 5. Realtime — required for cross-device live sync -------------
+-- Adds both tables to the built-in supabase_realtime publication so the
+-- app's postgres_changes subscription fires on every insert/update/delete.
+-- Wrapped so re-running this file is safe even if already enabled.
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and tablename = 'posts'
+  ) then
+    alter publication supabase_realtime add table posts;
+  end if;
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and tablename = 'comments'
+  ) then
+    alter publication supabase_realtime add table comments;
+  end if;
+end $$;

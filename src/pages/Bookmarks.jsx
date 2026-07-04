@@ -4,8 +4,10 @@ import { allBookmarks, toggleBookmark, formatDate } from '../store.js'
 import { Page } from '../components/Decor.jsx'
 import { stripHtml } from '../lib/sanitize.js'
 import Meta from '../components/Meta.jsx'
+import { useLiveData } from '../lib/bus.js'
 
 export default function Bookmarks() {
+  useLiveData()
   const [rev, setRev] = useState(0)
   const items = allBookmarks()
 

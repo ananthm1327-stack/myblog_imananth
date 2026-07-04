@@ -5,8 +5,10 @@ import Comments from '../components/Comments.jsx'
 import { Page } from '../components/Decor.jsx'
 import Meta from '../components/Meta.jsx'
 import { sanitize, stripHtml } from '../lib/sanitize.js'
+import { useLiveData } from '../lib/bus.js'
 
 export default function PostDetail({ sectionKey, label }) {
+  useLiveData()
   const { id } = useParams()
   const nav = useNavigate()
   const post = getPost(sectionKey, id)

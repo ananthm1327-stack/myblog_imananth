@@ -8,10 +8,12 @@ import Lightbox from '../components/Lightbox.jsx'
 import RichText from '../components/RichText.jsx'
 import { Page } from '../components/Decor.jsx'
 import { stripHtml } from '../lib/sanitize.js'
+import { useLiveData } from '../lib/bus.js'
 
 const SECTION_NUMERAL = { journal: 'I', photos: 'II', experiences: 'III', articles: 'IV', views: 'V' }
 
 export default function Section({ sectionKey, label }) {
+  useLiveData()
   const [rev, setRev] = useState(0)
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)

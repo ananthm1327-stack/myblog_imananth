@@ -1,5 +1,6 @@
 import { Routes, Route, NavLink, Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import Home from './pages/Home.jsx'
 import Section from './pages/Section.jsx'
 import PostDetail from './pages/PostDetail.jsx'
@@ -36,7 +37,7 @@ function OwnerToggle() {
   return (
     <>
       <Link to="#" onClick={(e) => { e.preventDefault(); setShowModal(true); }}>Sign In</Link>
-      {showModal && (
+      {showModal && createPortal(
         <div className="modal-backdrop signin-backdrop" onClick={() => setShowModal(false)}>
           <div className="modal signin-modal" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setShowModal(false)} aria-label="Close">&times;</button>
@@ -74,7 +75,8 @@ function OwnerToggle() {
               </button>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )

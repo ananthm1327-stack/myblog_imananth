@@ -1,38 +1,25 @@
-// Two-way sync between localStorage and Supabase.
-// Local storage stays the display layer — this module just mirrors changes.
+// Backend-first sync between Supabase and localStorage.
 //
-// - pullAll() runs once on app boot when Supabase is configured.
-//   It fetches all rows and merges into localStorage without clobbering unsynced local edits.
-// - pushPost / pushDelete / pushComment / pushModerate are fire-and-forget mirrors
-//   called from store.js after a successful local write. Failures are logged, not thrown.
+// Supabase is the single source of truth for posts + comments once configured:
+// pullAll() REPLACES the local mirror with whatever's in the database (no merge,
+// no "keep my local-only demo posts" logic) so every reader always sees exactly
+// what's in the backend. Reader-only state (bookmarks, "have I reacted") stays
+// local by design — it's per-browser, not shared content.
+//
+// - pullAll() runs at boot, on a background poll, and whenever a realtime event
+//   fires, then notifies the UI via emitDataChange() so open pages re-render.
+// - pushPost / pushDelete / pushComment / pushCommentUpdate / pushCommentDelete
+//   mirror local writes to Supabase, fire-and-forget. Failures are logged, not thrown.
 
 import { client, isSupabaseEnabled, OWNER_TOKEN } from './supabase.js'
+import { emitDataChange } from './bus.js'
 
 const SECTION_KEYS = ['journal', 'photos', 'experiences', 'articles', 'views']
+const POLL_INTERVAL_MS = 45_000
 
 function lsKey(section) { return `ia_${section}` }
-function loadLocal(section) {
-  try { return JSON.parse(localStorage.getItem(lsKey(section)) || '[]') } catch { return [] }
-}
 function saveLocal(section, items) {
   localStorage.setItem(lsKey(section), JSON.stringify(items))
-}
-
-// Merge remote rows into local: keep whichever version has the newer updated_at.
-// Preserves any local-only posts (e.g. saved offline before backend was enabled).
-function mergeInto(local, remote) {
-  const byId = new Map()
-  local.forEach(p => byId.set(p.id, p))
-  remote.forEach(r => {
-    const existing = byId.get(r.id)
-    if (!existing) { byId.set(r.id, r); return }
-    const lu = new Date(existing.updatedAt || existing.createdAt || 0).getTime()
-    const ru = new Date(r.updatedAt || r.createdAt || 0).getTime()
-    byId.set(r.id, ru >= lu ? r : existing)
-  })
-  return [...byId.values()].sort((a, b) =>
-    new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-  )
 }
 
 // Convert a DB row to the shape store.js expects.
@@ -65,8 +52,8 @@ function toRow(section, post) {
   }
 }
 
-// ----- PULL -----
-export async function pullAll() {
+// ----- PULL (backend replaces local — no merge) -----
+export async function pullAll({ silent = false } = {}) {
   if (!isSupabaseEnabled) return { ok: false, reason: 'disabled' }
   try {
     const [postsRes, commentsRes] = await Promise.all([
@@ -76,7 +63,6 @@ export async function pullAll() {
     if (postsRes.error) throw postsRes.error
     if (commentsRes.error) throw commentsRes.error
 
-    // Group posts by section and merge.
     const bySection = {}
     SECTION_KEYS.forEach(k => bySection[k] = [])
     postsRes.data.forEach(row => {
@@ -84,11 +70,11 @@ export async function pullAll() {
       if (arr) arr.push(fromRow(row))
     })
     SECTION_KEYS.forEach(section => {
-      const merged = mergeInto(loadLocal(section), bySection[section])
-      saveLocal(section, merged)
+      const sorted = bySection[section].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      saveLocal(section, sorted)
     })
 
-    // Rebuild comment map from remote (owner + reader view differ; store all).
+    // Comment map is fully rebuilt from remote too — the backend is authoritative.
     const map = {}
     commentsRes.data.forEach(c => {
       const key = `${c.section}_${c.post_id}`
@@ -102,23 +88,50 @@ export async function pullAll() {
         reactions: c.reactions || { heart: 0, sparkle: 0 }
       })
     })
-    // Merge with existing local comments (keep pending local, take approved remote).
-    const localMapRaw = localStorage.getItem('ia_comments')
-    const localMap = localMapRaw ? JSON.parse(localMapRaw) : {}
-    Object.keys(localMap).forEach(k => {
-      const localList = localMap[k] || []
-      const remoteList = map[k] || []
-      const remoteIds = new Set(remoteList.map(c => c.id))
-      const localOnly = localList.filter(c => !remoteIds.has(c.id))
-      map[k] = [...remoteList, ...localOnly]
-    })
     localStorage.setItem('ia_comments', JSON.stringify(map))
 
+    if (!silent) emitDataChange()
     return { ok: true, postCount: postsRes.data.length, commentCount: commentsRes.data.length }
   } catch (e) {
     console.warn('[sync] pull failed', e)
     return { ok: false, reason: e.message }
   }
+}
+
+// ----- REALTIME -----
+// Subscribes to postgres_changes on posts + comments. Any insert/update/delete
+// anywhere triggers a fresh full pull (debounced) so every open tab converges
+// on the backend's current state within ~1s of any change, on any device.
+//
+// Requires the tables to be added to the `supabase_realtime` publication —
+// see supabase/schema.sql for the one-line SQL that enables this.
+let realtimeChannel = null
+let pollTimer = null
+let debounceTimer = null
+
+function debouncedPull() {
+  clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => pullAll(), 300)
+}
+
+export function subscribeRealtime() {
+  if (!isSupabaseEnabled || realtimeChannel) return
+  realtimeChannel = client
+    .channel('ia-live-data')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, debouncedPull)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, debouncedPull)
+    .subscribe()
+  return () => {
+    if (realtimeChannel) { client.removeChannel(realtimeChannel); realtimeChannel = null }
+  }
+}
+
+// Backup for projects where the realtime publication isn't enabled — polls
+// on a slow interval so data still converges on the backend eventually.
+export function startPolling() {
+  if (!isSupabaseEnabled || pollTimer) return
+  pollTimer = setInterval(() => pullAll({ silent: false }), POLL_INTERVAL_MS)
+  return () => { clearInterval(pollTimer); pollTimer = null }
 }
 
 // ----- PUSH (fire-and-forget) -----
@@ -143,7 +156,10 @@ export function pushComment(section, postId, comment) {
     body: comment.body,
     created_at: comment.createdAt,
     status: comment.status || 'pending',
-    reactions: comment.reactions || { heart: 0, sparkle: 0 }
+    reactions: comment.reactions || { heart: 0, sparkle: 0 },
+    // Stamped on every comment (not just the owner's) so pullAll can select
+    // pending rows for moderation. See the note in supabase/schema.sql.
+    owner_token: OWNER_TOKEN
   }
   client.from('comments').upsert(row).then(({ error }) => {
     if (error) console.warn('[sync] pushComment failed', error)

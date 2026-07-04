@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom'
 import { pendingComments, moderateComment, isOwner, formatDate, generateSitemap } from '../store.js'
 import { isSupabaseEnabled, backendStatus } from '../lib/supabase.js'
 import { pullAll } from '../lib/sync.js'
+import { useLiveData } from '../lib/bus.js'
 import { Page } from '../components/Decor.jsx'
 
 export default function Moderation() {
+  useLiveData()
   const [rev, setRev] = useState(0)
   const [syncing, setSyncing] = useState(false)
   const [syncMsg, setSyncMsg] = useState(null)
@@ -66,7 +68,7 @@ export default function Moderation() {
 
       <div className="backend-strip">
         <span className={`backend-pill ${isSupabaseEnabled ? 'on' : 'off'}`}>
-          Backend: {isSupabaseEnabled ? 'Supabase connected' : 'local only (env not set)'}
+          Backend: {isSupabaseEnabled ? 'Supabase connected · live sync on' : 'local only (env not set)'}
         </span>
         {isSupabaseEnabled && (
           <button className="btn small ghost" onClick={doPull} disabled={syncing}>
@@ -77,6 +79,13 @@ export default function Moderation() {
           <span className={`sync-msg ${syncMsg.ok ? 'ok' : 'err'}`}>{syncMsg.msg}</span>
         )}
       </div>
+      {isSupabaseEnabled && (
+        <p className="backend-note">
+          All posts and comments shown here come directly from Supabase — every write is mirrored to the
+          database and every open tab stays in sync via realtime updates (with a background pull every 45s
+          as a fallback).
+        </p>
+      )}
 
       {pending.length === 0 ? (
         <div className="empty">No comments waiting. Inbox zero.</div>

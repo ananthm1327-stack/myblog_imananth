@@ -157,17 +157,36 @@ The **owner token** is your write secret. Any client with this token can insert/
 
 ### 3. How it works
 
-- **Reads are local-first.** All pages render from `localStorage` — no waiting on the network.
-- **On boot**, the app calls `pullAll()`: fetches remote posts + comments and merges them into local storage, preferring whichever version has the newer `updated_at`.
-- **Writes are fire-and-forget.** When the owner creates/edits/deletes a post (or a reader submits a comment, or moderator approves), the local write completes instantly and the change is mirrored to Supabase in the background. Failures log to the console; they never block the UI.
-- **Backend status pill** on the `/moderation` page shows whether Supabase is connected, plus a **Pull now** button to force a refresh.
-- If the env vars are missing, `isSupabaseEnabled` is `false` and the app runs identically to the local-only build — nothing crashes.
+**Once Supabase is configured, it is the single source of truth.** `localStorage` is only a fast local cache/mirror of whatever's in the database — the app never invents or preserves local-only content once a backend is wired up:
 
-### 4. Security notes
+- **No demo seeding.** `seedIfEmpty()` only runs when Supabase is *not* configured. With a backend enabled, an empty database means an empty (correctly empty) site — no leftover dummy posts pretending to be real content.
+- **`pullAll()` fully replaces** the local mirror for posts and comments with exactly what's in Supabase (no merge, no "keep my local edits" logic). This runs:
+  - once at boot,
+  - immediately after any realtime event (insert/update/delete anywhere in `posts` or `comments`, debounced ~300ms),
+  - and every 45s on a background poll (a fallback in case realtime isn't enabled on the project).
+- **Live UI updates.** A tiny pub/sub (`src/lib/bus.js`) notifies every open page after a pull completes, so Home/Section/PostDetail/Bookmarks/Moderation all re-render with fresh data automatically — no manual refresh needed on any device.
+- **Writes are fire-and-forget mirrors.** When the owner creates/edits/deletes a post, or a reader submits a comment, or the owner approves one, the local write completes instantly (so the UI feels instant) and is mirrored to Supabase in the background. Failures log to the console; they never block the UI. The very next pull/realtime event reconciles anything that failed.
+- **Backend status pill** on the `/moderation` page shows whether Supabase is connected and live-syncing, plus a **Pull now** button to force an immediate refresh.
+- **Reader-only state stays local by design** — bookmarks (`ia_bookmarks`) and "have I already reacted to this comment" (`ia_reactions_mine`) are per-browser preferences, not shared content, so they are never pulled from or pushed to the backend.
+- If the env vars are missing, `isSupabaseEnabled` is `false` and the app falls back to local-only demo mode — nothing crashes.
+
+### 4. Enable Realtime (for instant cross-tab/cross-device updates)
+
+`supabase/schema.sql` includes the SQL to add `posts` and `comments` to the `supabase_realtime` publication — running the schema file (step 1) already does this. If you skipped that or added the tables after the fact, run just this part again:
+
+```sql
+alter publication supabase_realtime add table posts;
+alter publication supabase_realtime add table comments;
+```
+
+Without this, the app still stays correct via the 45-second background poll — you just won't see other devices' changes appear within a second.
+
+### 5. Security notes
 
 - The **anon key is public**. It's meant to be shipped to the browser. RLS policies in the schema stop anon clients from writing posts unless they include the `owner_token`.
-- The **owner token is embedded in the bundle**, so treat it as a low-value shared secret (rotate it periodically). For a hardened setup, front the mutations with a Supabase Edge Function that validates a real JWT.
-- The default policies allow anonymous read of published posts and approved comments, anonymous insert of pending comments only.
+- The **owner token is embedded in the bundle**, so treat it as a low-value shared secret (rotate it periodically). Because it's baked into the public JS, *every* visitor's browser actually sends it as a header on every Supabase request — the real "owner-only" gate is the app's client-side `isOwner()` check (a `sessionStorage` flag set by the sign-in modal), which hides the `/moderation` page and the "+ New" / delete buttons from everyday readers. The database itself trusts anyone who has the token, which in practice means anyone who's opened devtools on your site.
+- For a hardened setup, replace the token-header approach with real Supabase Auth (magic link login as the owner) and put mutations behind Edge Functions that check a verified JWT instead of a shared string.
+- The default policies allow anonymous read of published posts and approved comments, and anonymous insert of pending comments only.
 
 ---
 

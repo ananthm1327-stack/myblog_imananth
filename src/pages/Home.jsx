@@ -4,10 +4,12 @@ import { load, formatDate, isLivePost, isOwner } from '../store.js'
 import { ClosingFlourish } from '../components/Decor.jsx'
 import { stripHtml } from '../lib/sanitize.js'
 import Meta from '../components/Meta.jsx'
+import { useLiveData } from '../lib/bus.js'
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V']
 
 export default function Home({ sections }) {
+  useLiveData()
   return (
     <>
       <section className="hero">
