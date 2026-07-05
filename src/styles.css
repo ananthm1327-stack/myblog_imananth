@@ -213,12 +213,12 @@
   flex-shrink: 0;
 }
 .cookie-accept {
-  background: var(--gold);
+  background: var(--gold) !important;
   color: #fff !important;
   border-color: var(--gold);
   margin: 0 !important;
 }
-.cookie-accept:hover { background: var(--gold-deep); border-color: var(--gold-deep); }
+.cookie-accept:hover { background: var(--gold-deep) !important; border-color: var(--gold-deep); }
 
 @media (max-width: 640px) {
   .cookie-banner { left: 12px; right: 12px; bottom: 12px; }
@@ -592,6 +592,67 @@ h1, h2, h3, h4 {
 }
 .nav-links a.active::after {
   transform: translateX(-50%) rotate(45deg) scale(1);
+}
+
+/* ================================================================
+   GOLD CURSOR — the native arrow shape, just tinted to the site's gold
+   (no JS follower — a real cursor image, so it's instant everywhere)
+   ================================================================ */
+html, html * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M8 4 L8 26 L13 21.5 L17 29.5 L21 27.5 L16.5 20.5 L24 20.5 Z' fill='%23c8a24b' stroke='%234a4f52' stroke-width='1.2' stroke-linejoin='round'/%3E%3C/svg%3E") 8 4, auto !important;
+}
+html input, html textarea,
+html [contenteditable="true"], html [contenteditable=""] {
+  cursor: text !important;
+}
+
+/* ================================================================
+   CLICK SPARK — small gold burst on every click (mouse or tap)
+   ================================================================ */
+.click-spark-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  pointer-events: none;
+}
+.click-spark-burst {
+  position: fixed;
+  width: 0; height: 0;
+}
+.click-spark-ring {
+  position: absolute;
+  top: 0; left: 0;
+  width: 10px; height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+  animation: sparkRing .5s ease-out forwards;
+}
+@keyframes sparkRing {
+  from { transform: scale(0.3); opacity: .9; }
+  to   { transform: scale(3.4); opacity: 0; }
+}
+.click-spark-particle {
+  position: absolute;
+  top: 0; left: 0;
+  transform-origin: left center;
+  animation: sparkFly .62s cubic-bezier(.2,.7,.3,1) forwards;
+}
+.spark-ray {
+  width: 14px; height: 2px;
+  margin-top: -1px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  border-radius: 1px;
+}
+.spark-diamond {
+  margin: -7px 0 0 -5px;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--gold);
+}
+@keyframes sparkFly {
+  0%   { transform: rotate(var(--angle)) translateX(0) scale(1); opacity: 1; }
+  100% { transform: rotate(var(--angle)) translateX(var(--dist)) scale(.4); opacity: 0; }
 }
 
 /* MAIN */
@@ -1777,6 +1838,100 @@ main {
 }
 
 /* -------- HOME SECTION ORNAMENTS -------- */
+/* DAILY QUOTE — an editorial pull-quote band, not a boxed-in card. Reuses
+   the site's existing vocabulary: a vertical rail label like the home
+   section's Roman-numeral rail, and a giant ghost watermark letter like
+   .section-watermark, so it reads as part of the same design family as
+   the sections directly below it rather than a bolted-on ornament.
+   Animation is a single one-time entrance only — no infinite spin/pulse. */
+.daily-quote {
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto 64px;
+  padding: 0 40px;
+  animation: heroFade 700ms 100ms ease-out both;
+}
+.daily-quote-inner {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 36px;
+  padding: 46px 0 50px;
+  border-top: 1px solid rgba(200, 162, 75, 0.35);
+  border-bottom: 1px solid rgba(200, 162, 75, 0.35);
+}
+.daily-quote-rail {
+  flex-shrink: 0;
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.daily-quote-rail-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  color: var(--gold);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.daily-quote-main {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  isolation: isolate;
+}
+.daily-quote-watermark {
+  position: absolute;
+  top: -64px;
+  left: -8px;
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: 220px;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200, 162, 75, 0.18);
+  z-index: -1;
+  pointer-events: none;
+  user-select: none;
+}
+.daily-quote-body {
+  margin: 0;
+  max-width: 780px;
+}
+.daily-quote-body p {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(24px, 3.1vw, 34px);
+  line-height: 1.48;
+  color: var(--titanium-dark);
+  margin: 0;
+}
+.daily-quote-date {
+  margin-top: 24px;
+  color: var(--gold-deep);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1024px) {
+  .daily-quote-watermark { font-size: 170px; top: -46px; }
+}
+@media (max-width: 760px) {
+  .daily-quote { padding: 0 18px; margin-bottom: 50px; }
+  .daily-quote-inner { flex-direction: column; gap: 18px; padding: 34px 0 38px; }
+  .daily-quote-rail { width: auto; justify-content: flex-start; }
+  .daily-quote-rail-text { writing-mode: horizontal-tb; transform: none; font-size: 11px; letter-spacing: 3px; }
+  .daily-quote-watermark { font-size: 110px; top: -26px; left: -4px; }
+  .daily-quote-date { margin-top: 18px; }
+}
+
 .home-section {
   position: relative;
   padding: 40px 0 60px;
@@ -3413,7 +3568,8 @@ a.ct-method:hover .ct-method-icon { background: var(--gold); color: #fff; }
   padding: 24px 0;
   gap: 4px;
 }
-.nav-drawer-links a {
+.nav-drawer-links a,
+.nav-drawer-search {
   padding: 16px 28px;
   color: var(--gold) !important;
   font-family: 'Cormorant Garamond', serif;
@@ -3426,6 +3582,22 @@ a.ct-method:hover .ct-method-icon { background: var(--gold); color: #fff; }
   min-height: 44px;
   display: flex; align-items: center;
 }
+.nav-drawer-search {
+  gap: 12px;
+  width: 100%;
+  background: transparent;
+  border-top: none; border-right: none; border-bottom: 1px solid rgba(200, 162, 75, 0.22);
+  margin-bottom: 8px;
+  padding-bottom: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.nav-drawer-search svg { flex-shrink: 0; color: var(--gold); }
+.nav-drawer-search:hover { background: rgba(200, 162, 75, 0.08); color: var(--gold-deep) !important; }
+.nav-drawer-search:hover svg { color: var(--gold-deep); }
 .nav-drawer-links a:hover,
 .nav-drawer-links a.active {
   background: rgba(200, 162, 75, 0.08);
@@ -3461,6 +3633,8 @@ a.ct-method:hover .ct-method-icon { background: var(--gold); color: #fff; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
   .photo-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
   .footer-grid { grid-template-columns: 1.4fr 1fr 1.4fr; gap: 40px; }
+  .nav-links { display: none; }
+  .nav-burger { display: inline-flex; }
 }
 
 /* -------- MOBILE (<=760px) -------- */
@@ -3474,8 +3648,6 @@ a.ct-method:hover .ct-method-icon { background: var(--gold); color: #fff; }
   .nav-logo { height: 38px; }
   .nav-brand { font-size: 22px; gap: 10px; }
   .nav-brand-text { display: none; }
-  .nav-links { display: none; }
-  .nav-burger { display: inline-flex; }
 
   main { padding: 24px 18px; }
 

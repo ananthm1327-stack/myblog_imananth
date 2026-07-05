@@ -13,6 +13,7 @@
 
 import { client, isSupabaseEnabled, OWNER_TOKEN } from './supabase.js'
 import { emitDataChange } from './bus.js'
+import { toast } from './toast.js'
 
 const SECTION_KEYS = ['journal', 'photos', 'experiences', 'articles', 'views']
 const POLL_INTERVAL_MS = 45_000
@@ -134,17 +135,38 @@ export function startPolling() {
   return () => { clearInterval(pollTimer); pollTimer = null }
 }
 
-// ----- PUSH (fire-and-forget) -----
+// ----- PUSH (fire-and-forget, but surfaced to the owner on failure) -----
+// A silent failure here means the post only ever exists in this browser's
+// localStorage — every other device stays stuck on whatever pullAll last saw.
+// That's the exact "why can't I see it on my other devices" bug, so any
+// push failure (including a missing/misconfigured owner token) gets a toast.
+function warnNotSynced(message) {
+  toast.error(message, { duration: 6000 })
+}
 export function pushPost(section, post) {
-  if (!isSupabaseEnabled || !OWNER_TOKEN) return
+  if (!isSupabaseEnabled) return
+  if (!OWNER_TOKEN) {
+    warnNotSynced("Owner token isn't configured — this post is only saved on this device.")
+    return
+  }
   client.from('posts').upsert(toRow(section, post)).then(({ error }) => {
-    if (error) console.warn('[sync] pushPost failed', error)
+    if (error) {
+      console.warn('[sync] pushPost failed', error)
+      warnNotSynced("Couldn't sync this post to the server — it's only on this device for now.")
+    }
   })
 }
 export function pushDelete(section, id) {
-  if (!isSupabaseEnabled || !OWNER_TOKEN) return
+  if (!isSupabaseEnabled) return
+  if (!OWNER_TOKEN) {
+    warnNotSynced("Owner token isn't configured — this delete only applied on this device.")
+    return
+  }
   client.from('posts').delete().match({ id, section, owner_token: OWNER_TOKEN }).then(({ error }) => {
-    if (error) console.warn('[sync] pushDelete failed', error)
+    if (error) {
+      console.warn('[sync] pushDelete failed', error)
+      warnNotSynced("Couldn't sync this delete to the server — it may still show on other devices.")
+    }
   })
 }
 export function pushComment(section, postId, comment) {

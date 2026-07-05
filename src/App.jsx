@@ -14,6 +14,7 @@ import SearchOverlay from './components/SearchOverlay.jsx'
 import Preloader from './components/Preloader.jsx'
 import CookieConsent from './components/CookieConsent.jsx'
 import ToastHost from './components/ToastHost.jsx'
+import ClickSpark from './components/ClickSpark.jsx'
 import { isOwner, login, logout, pendingComments } from './store.js'
 import { toast } from './lib/toast.js'
 
@@ -87,7 +88,7 @@ function OwnerToggle() {
   )
 }
 
-function MobileNav({ open, onClose }) {
+function MobileNav({ open, onClose, onSearch }) {
   const location = useLocation()
   const firstRender = useRef(true)
   useEffect(() => {
@@ -110,6 +111,12 @@ function MobileNav({ open, onClose }) {
           <button className="nav-drawer-close" aria-label="Close menu" onClick={onClose}>&times;</button>
         </div>
         <nav className="nav-drawer-links">
+          <button type="button" className="nav-drawer-search" onClick={() => { onClose(); onSearch(); }}>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="7" /><line x1="16.5" y1="16.5" x2="21" y2="21" />
+            </svg>
+            Search
+          </button>
           <NavLink to="/" onClick={onClose}>Home</NavLink>
           {SECTIONS.map(s => (
             <NavLink key={s.key} to={`/${s.key}`} onClick={onClose}>{s.label}</NavLink>
@@ -144,6 +151,7 @@ export default function App() {
   return (
     <div className="app">
       <Preloader />
+      <ClickSpark />
       <ToastHost />
       <CookieConsent delay={3400} />
       <Meta />
@@ -196,7 +204,7 @@ export default function App() {
           <span /><span /><span />
         </button>
       </nav>
-      <MobileNav open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <MobileNav open={menuOpen} onClose={() => setMenuOpen(false)} onSearch={() => setSearchOpen(true)} />
 
       <main>
         <Routes>
