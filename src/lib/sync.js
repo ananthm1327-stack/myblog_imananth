@@ -23,6 +23,24 @@ function saveLocal(section, items) {
   localStorage.setItem(lsKey(section), JSON.stringify(items))
 }
 
+// Whether the most recent pull attempt succeeded. Pages check this (via
+// getSyncStatus, re-rendered by the same emitDataChange used for real data)
+// to tell a genuinely empty section apart from one that just failed to load
+// — the exact "why can't I see the post on this device" failure mode, now
+// visible instead of indistinguishable from an empty section.
+let lastPullOk = true
+export function getSyncStatus() { return { ok: lastPullOk, hasPulled: hasPulledOnce } }
+let hasPulledOnce = false
+
+let retryTimer = null
+let retryAttempt = 0
+function scheduleRetry() {
+  clearTimeout(retryTimer)
+  const delay = Math.min(2000 * 2 ** retryAttempt, 20000)
+  retryAttempt = Math.min(retryAttempt + 1, 4)
+  retryTimer = setTimeout(() => pullAll(), delay)
+}
+
 // Convert a DB row to the shape store.js expects.
 function fromRow(row) {
   return {
@@ -91,10 +109,18 @@ export async function pullAll({ silent = false } = {}) {
     })
     localStorage.setItem('ia_comments', JSON.stringify(map))
 
+    hasPulledOnce = true
+    lastPullOk = true
+    retryAttempt = 0
+    clearTimeout(retryTimer)
     if (!silent) emitDataChange()
     return { ok: true, postCount: postsRes.data.length, commentCount: commentsRes.data.length }
   } catch (e) {
     console.warn('[sync] pull failed', e)
+    hasPulledOnce = true
+    lastPullOk = false
+    emitDataChange() // let pages show "couldn't load" instead of a silent stale/empty view
+    scheduleRetry()
     return { ok: false, reason: e.message }
   }
 }
@@ -133,6 +159,22 @@ export function startPolling() {
   if (!isSupabaseEnabled || pollTimer) return
   pollTimer = setInterval(() => pullAll({ silent: false }), POLL_INTERVAL_MS)
   return () => { clearInterval(pollTimer); pollTimer = null }
+}
+
+// A phone locking mid-load, losing signal, or backgrounding the tab is the
+// most common way a mobile device ends up stuck on a failed/incomplete pull.
+// Re-pull the moment connectivity or visibility comes back instead of making
+// the reader wait out the rest of the 45s poll interval.
+export function subscribeLifecycle() {
+  if (!isSupabaseEnabled) return
+  const onOnline = () => pullAll()
+  const onVisible = () => { if (document.visibilityState === 'visible') pullAll() }
+  window.addEventListener('online', onOnline)
+  document.addEventListener('visibilitychange', onVisible)
+  return () => {
+    window.removeEventListener('online', onOnline)
+    document.removeEventListener('visibilitychange', onVisible)
+  }
 }
 
 // ----- PUSH (fire-and-forget, but surfaced to the owner on failure) -----

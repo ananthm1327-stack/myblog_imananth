@@ -930,6 +930,29 @@ main {
   padding: 40px 0;
   text-align: center;
 }
+.empty-error {
+  color: var(--titanium-dark);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.empty-retry {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  background: transparent;
+  border: 1.5px solid var(--gold);
+  padding: 10px 24px;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+  font-style: normal;
+}
+.empty-retry:hover:not(:disabled) { background: var(--gold); color: #fff; }
+.empty-retry:disabled { opacity: .6; cursor: default; }
 
 /* FORMS */
 .form {

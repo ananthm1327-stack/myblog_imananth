@@ -8,6 +8,7 @@ import {
 import Lightbox from '../components/Lightbox.jsx'
 import RichText from '../components/RichText.jsx'
 import { Page } from '../components/Decor.jsx'
+import EmptyState from '../components/EmptyState.jsx'
 import { stripHtml } from '../lib/sanitize.js'
 import { useLiveData } from '../lib/bus.js'
 import { toast } from '../lib/toast.js'
@@ -96,7 +97,7 @@ export default function Section({ sectionKey, label }) {
       )}
 
       {items.length === 0 ? (
-        <div className="empty">No posts here yet.</div>
+        <EmptyState label="No posts here yet." />
       ) : isPhotos ? (
         <>
           <div className="photo-grid">

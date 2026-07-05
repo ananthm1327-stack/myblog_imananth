@@ -5,6 +5,7 @@ import { ClosingFlourish } from '../components/Decor.jsx'
 import { stripHtml } from '../lib/sanitize.js'
 import Meta from '../components/Meta.jsx'
 import DailyQuote from '../components/DailyQuote.jsx'
+import EmptyState from '../components/EmptyState.jsx'
 import { useLiveData } from '../lib/bus.js'
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V']
@@ -54,7 +55,7 @@ export default function Home({ sections }) {
                 <Link to={`/${s.key}`} style={{ color: 'var(--gold-deep)', fontSize: 13, letterSpacing: 2, textTransform: 'uppercase' }}>View all &rarr;</Link>
               </div>
               {items.length === 0 ? (
-                <div className="empty">Nothing here yet.</div>
+                <EmptyState />
               ) : (
                 <div className="grid">
                   {items.map(p => (

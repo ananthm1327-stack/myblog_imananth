@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App.jsx'
 import { seedIfEmpty } from './seed.js'
-import { pullAll, subscribeRealtime, startPolling } from './lib/sync.js'
+import { pullAll, subscribeRealtime, startPolling, subscribeLifecycle } from './lib/sync.js'
 import { isSupabaseEnabled } from './lib/supabase.js'
 import './styles.css'
 
@@ -16,6 +16,7 @@ if (isSupabaseEnabled) {
   })
   subscribeRealtime()
   startPolling()
+  subscribeLifecycle()
 } else {
   // No backend configured — fall back to local demo content so the site
   // isn't empty on first run.
