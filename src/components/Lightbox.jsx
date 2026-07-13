@@ -1,4 +1,6 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
+import { stripHtml } from '../lib/sanitize.js'
 
 export default function Lightbox({ items, index, onClose, onIndex }) {
   const current = items[index]
@@ -18,7 +20,7 @@ export default function Lightbox({ items, index, onClose, onIndex }) {
   }, [index, items.length])
 
   if (!current) return null
-  return (
+  return createPortal(
     <div className="lb-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label="Photo viewer">
       <button className="lb-close" onClick={onClose} aria-label="Close">&times;</button>
       <button
@@ -27,7 +29,7 @@ export default function Lightbox({ items, index, onClose, onIndex }) {
         aria-label="Previous photo"
       >&#8249;</button>
       <figure className="lb-frame" onClick={(e) => e.stopPropagation()}>
-        <img src={current.image} alt={current.title || ''} className="lb-img" />
+        <img src={current.image} alt={stripHtml(current.title) || ''} className="lb-img" />
         {(current.title || current.body) && (
           <figcaption className="lb-caption">
             {current.title && (
@@ -45,6 +47,7 @@ export default function Lightbox({ items, index, onClose, onIndex }) {
         onClick={(e) => { e.stopPropagation(); onIndex((index + 1) % items.length) }}
         aria-label="Next photo"
       >&#8250;</button>
-    </div>
+    </div>,
+    document.body
   )
 }
