@@ -1749,6 +1749,62 @@ main {
 .rt-editor ul, .rt-editor ol { padding-left: 24px; margin: 10px 0; }
 .rt-editor a { color: var(--gold-deep); text-decoration: underline; }
 
+.rt-mode-btn { font-family: 'Inter', sans-serif; font-size: 12px; padding: 0 10px; }
+.rt-mode-btn.active {
+  background: rgba(200, 162, 75, 0.16);
+  color: var(--gold-deep);
+  border-color: rgba(200, 162, 75, 0.45);
+}
+.rt-html {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  outline: none;
+  resize: vertical;
+  background: #fbfaf6;
+  color: var(--titanium-dark);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.rt-md-panel {
+  border-bottom: 1px solid var(--line);
+  background: rgba(200, 162, 75, 0.05);
+  padding: 12px 14px;
+}
+.rt-md-input {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(200, 162, 75, 0.3);
+  background: #fff;
+  color: var(--titanium-dark);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  resize: vertical;
+}
+.rt-md-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+.rt-md-hint {
+  flex: 1;
+  color: var(--titanium);
+  font-size: 12px;
+  font-style: italic;
+}
+.rt-md-insert {
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold);
+}
+.rt-md-insert:hover { background: var(--gold-deep); border-color: var(--gold-deep); }
+.rt-md-insert:disabled { opacity: .5; cursor: default; }
+
 /* Rendered rich-text content (post body + lightbox captions) */
 .rt-content p { margin: 0 0 16px; }
 .rt-content h2 { font-size: 28px; margin: 24px 0 10px; color: var(--titanium-dark); }
@@ -3854,6 +3910,8 @@ img, video, canvas { max-width: 100%; height: auto; }
   /* Sign-in / rich text editor buttons stay tap-friendly */
   .rt-toolbar { gap: 3px; padding: 5px 6px; }
   .rt-btn { min-width: 34px; height: 34px; padding: 0 6px; font-size: 12px; }
+  .rt-md-actions { flex-wrap: wrap; }
+  .rt-md-hint { flex-basis: 100%; }
 
   /* Comments */
   .comment { padding: 14px 16px; }
