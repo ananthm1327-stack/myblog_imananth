@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { pendingComments, moderateComment, isOwner, formatDate, generateSitemap } from '../store.js'
 import { useLiveData } from '../lib/bus.js'
 import { Page } from '../components/Decor.jsx'
+import Meta from '../components/Meta.jsx'
 import { toast } from '../lib/toast.js'
 
 export default function Moderation() {
@@ -13,6 +14,7 @@ export default function Moderation() {
   if (!owner) {
     return (
       <Page label="Moderation">
+        <Meta title="Moderation" noindex />
         <div className="post-detail">
           <h1>Moderation</h1>
           <p style={{ color: 'var(--titanium)' }}>You need to sign in as owner to see this page.</p>
@@ -48,8 +50,9 @@ export default function Moderation() {
 
   return (
     <Page label="Moderation">
+      <Meta title="Moderation" noindex />
       <div className="section-header">
-        <h2>Moderation Queue</h2>
+        <h1>Moderation Queue</h1>
         <div className="section-actions">
           <button className="btn small ghost" onClick={openSitemap}>View sitemap</button>
           <button className="btn small ghost" onClick={downloadSitemap}>Download sitemap.xml</button>

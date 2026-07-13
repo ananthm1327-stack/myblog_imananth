@@ -4,6 +4,7 @@ import { getPost, deletePost, isOwner, formatDate, isLivePost, isScheduled, isBo
 import Comments from '../components/Comments.jsx'
 import { Page } from '../components/Decor.jsx'
 import Meta from '../components/Meta.jsx'
+import { postJsonLd } from '../lib/jsonld.js'
 import { sanitize, stripHtml } from '../lib/sanitize.js'
 import { useLiveData } from '../lib/bus.js'
 import { toast } from '../lib/toast.js'
@@ -19,6 +20,7 @@ export default function PostDetail({ sectionKey, label }) {
   if (!post) {
     return (
       <Page label={label}>
+        <Meta title="Post not found" noindex />
         <div className="post-detail">
           <Link to={`/${sectionKey}`} className="back-link">&larr; Back to {label}</Link>
           <div className="empty">Post not found.</div>
@@ -31,6 +33,7 @@ export default function PostDetail({ sectionKey, label }) {
   if (!isLivePost(post) && !owner) {
     return (
       <Page label={label}>
+        <Meta title="Not published yet" noindex />
         <div className="post-detail">
           <Link to={`/${sectionKey}`} className="back-link">&larr; Back to {label}</Link>
           <div className="empty">This post isn't published yet.</div>
@@ -40,14 +43,17 @@ export default function PostDetail({ sectionKey, label }) {
   }
 
   const scheduled = isScheduled(post)
+  const postTitle = stripHtml(post.title)
+  const postDescription = stripHtml(post.body || '').slice(0, 200)
+  const postPath = `/${sectionKey}/${post.id}`
 
   return (
     <Page label={label}>
     <Meta
-      title={stripHtml(post.title)}
-      description={stripHtml(post.body || '').slice(0, 200)}
+      title={postTitle}
+      description={postDescription}
       image={post.image || undefined}
-      path={`/${sectionKey}/${post.id}`}
+      path={postPath}
       type="article"
       article={{
         publishedTime: post.createdAt,
@@ -55,6 +61,14 @@ export default function PostDetail({ sectionKey, label }) {
         section: label,
         tags: post.tags || []
       }}
+      jsonLd={postJsonLd({
+        title: postTitle,
+        description: postDescription,
+        image: post.image,
+        path: postPath,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt
+      })}
     />
     <div className="post-detail">
       <div className="post-top-row">
@@ -85,7 +99,7 @@ export default function PostDetail({ sectionKey, label }) {
       )}
       <h1 dangerouslySetInnerHTML={{ __html: sanitize(post.title) }} />
       <div className="meta">{formatDate(post.createdAt)} &middot; {label}</div>
-      {post.image && <img src={post.image} alt="" />}
+      {post.image && <img src={post.image} alt={stripHtml(post.title)} />}
       {post.body && <div className="body rt-content" dangerouslySetInnerHTML={{ __html: sanitize(post.body) }} />}
 
       {(post.tags || []).length > 0 && (

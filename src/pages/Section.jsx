@@ -9,11 +9,19 @@ import Lightbox from '../components/Lightbox.jsx'
 import RichText from '../components/RichText.jsx'
 import { Page } from '../components/Decor.jsx'
 import EmptyState from '../components/EmptyState.jsx'
+import Meta from '../components/Meta.jsx'
 import { stripHtml } from '../lib/sanitize.js'
 import { useLiveData } from '../lib/bus.js'
 import { toast } from '../lib/toast.js'
 
 const SECTION_NUMERAL = { journal: 'I', photos: 'II', experiences: 'III', articles: 'IV', views: 'V' }
+const SECTION_DESCRIPTIONS = {
+  journal: "Personal journal entries from Ananth Machiraju — everyday reflections, unfiltered.",
+  photos: 'A photo essay collection by Ananth Machiraju.',
+  experiences: 'Lived experiences and stories from Ananth Machiraju.',
+  articles: 'Long-form articles and essays by Ananth Machiraju.',
+  views: "Honest views and opinions on technology, cities, books, and the world, from Ananth Machiraju."
+}
 
 export default function Section({ sectionKey, label }) {
   useLiveData()
@@ -66,9 +74,10 @@ export default function Section({ sectionKey, label }) {
 
   return (
     <Page label={label} numeral={SECTION_NUMERAL[sectionKey]}>
+      <Meta title={label} description={SECTION_DESCRIPTIONS[sectionKey]} path={`/${sectionKey}`} />
       <div className="section-header">
         <div>
-          <h2>{label}</h2>
+          <h1>{label}</h1>
           {activeTag && (
             <div className="tag-filter-active">
               Filtering by <span className="tag-chip is-active">#{activeTag}</span>
@@ -141,7 +150,7 @@ export default function Section({ sectionKey, label }) {
             {items.map(p => (
               <div key={p.id} className={`card ${p.status === 'draft' ? 'is-draft' : ''}`} style={{ position: 'relative' }}>
                 <Link to={`/${sectionKey}/${p.id}`} style={{ display: 'block' }}>
-                  {p.image && <img src={p.image} alt="" />}
+                  {p.image && <img src={p.image} alt={stripHtml(p.title)} />}
                   <div className="meta">
                     {formatDate(p.createdAt)}
                     {p.status === 'draft' && <span className="badge-draft">DRAFT</span>}

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Page } from '../components/Decor.jsx'
+import Meta from '../components/Meta.jsx'
 import { toast } from '../lib/toast.js'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -127,6 +128,11 @@ export default function Contact() {
 
   return (
     <Page label="Contact">
+      <Meta
+        title="Contact"
+        description="Get in touch with Ananth Machiraju — questions, corrections, or just to say hello."
+        path="/contact"
+      />
       <article className="contact-v2">
         {/* ---------- HERO ---------- */}
         <header className="ct-hero">

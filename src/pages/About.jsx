@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Page } from '../components/Decor.jsx'
+import Meta from '../components/Meta.jsx'
 
 // ------- EDIT THIS OBJECT TO PERSONALIZE THE PAGE -------
 // Everything the page renders is driven from here so you can update
@@ -90,8 +91,13 @@ export default function About() {
   const { intro, family, professional, website, socials } = ABOUT
   return (
     <Page label="About">
+      <Meta
+        title="About"
+        description="Project Manager and IT Delivery Lead by day, writer and photographer by night. Meet Ananth Machiraju."
+        path="/about"
+      />
       <div className="section-header">
-        <h2>About Ananth</h2>
+        <h1>About Ananth</h1>
       </div>
 
       <article className="about">

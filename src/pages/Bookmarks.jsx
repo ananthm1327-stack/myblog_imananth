@@ -20,9 +20,9 @@ export default function Bookmarks() {
 
   return (
     <Page label="Bookmarks">
-      <Meta title="Bookmarks" description="Posts you've saved for later reading." />
+      <Meta title="Bookmarks" description="Posts you've saved for later reading." noindex />
       <div className="section-header">
-        <h2>Bookmarks</h2>
+        <h1>Bookmarks</h1>
         <span className="meta" style={{ margin: 0 }}>{items.length} saved</span>
       </div>
 
@@ -35,7 +35,7 @@ export default function Bookmarks() {
           {items.map(({ sectionKey, post }) => (
             <div key={`${sectionKey}-${post.id}`} className="card" style={{ position: 'relative' }}>
               <Link to={`/${sectionKey}/${post.id}`} style={{ display: 'block' }}>
-                {post.image && <img src={post.image} alt="" />}
+                {post.image && <img src={post.image} alt={stripHtml(post.title)} />}
                 <div className="meta">
                   {formatDate(post.createdAt)} &middot; <span style={{ color: 'var(--gold-deep)' }}>{sectionKey}</span>
                 </div>

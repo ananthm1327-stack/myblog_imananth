@@ -875,6 +875,7 @@ main {
   border-bottom: 1px solid var(--line);
   padding-bottom: 14px;
 }
+.section-header h1,
 .section-header h2 {
   font-size: 34px;
   margin: 0;
@@ -3650,7 +3651,7 @@ a.ct-method:hover .ct-method-icon { background: var(--gold); color: #fff; }
 
   /* Sections */
   .section-header { flex-direction: column; align-items: flex-start; gap: 12px; padding-bottom: 12px; }
-  .section-header h2 { font-size: 28px; }
+  .section-header h1, .section-header h2 { font-size: 28px; }
 
   .grid { grid-template-columns: 1fr; gap: 18px; }
   .card { padding: 20px; }
@@ -3699,7 +3700,7 @@ a.ct-method:hover .ct-method-icon { background: var(--gold); color: #fff; }
   .hero-title-name { font-size: clamp(70px, 26vw, 110px); }
   .hero-monogram { font-size: 180px; }
   .hero-tagline { font-size: 16px; }
-  .section-header h2 { font-size: 24px; }
+  .section-header h1, .section-header h2 { font-size: 24px; }
   .footer-social { width: 42px; height: 42px; }
 }
 
@@ -3819,7 +3820,7 @@ img, video, canvas { max-width: 100%; height: auto; }
   .hero-monogram { font-size: 200px; letter-spacing: -6px; }
   .hero-tagline { font-size: 15px; line-height: 1.55; padding: 0 6px; }
   .hero-btn { padding: 12px 22px; font-size: 12px; }
-  .section-header h2 { font-size: 26px; }
+  .section-header h1, .section-header h2 { font-size: 26px; }
   .card { padding: 18px; }
   .card img { height: 160px; }
   .card h3 { font-size: 20px; }
@@ -3906,7 +3907,7 @@ img, video, canvas { max-width: 100%; height: auto; }
   .nav { padding: 8px 12px; }
   .nav-logo { height: 32px; }
   .btn { padding: 12px 20px; letter-spacing: 1px; font-size: 11px; }
-  .section-header h2 { font-size: 22px; }
+  .section-header h1, .section-header h2 { font-size: 22px; }
   .card { padding: 16px; }
   .footer-social { width: 38px; height: 38px; }
   .signin-modal { padding: 24px 16px 20px; }

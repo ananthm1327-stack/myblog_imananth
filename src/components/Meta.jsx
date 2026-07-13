@@ -30,9 +30,32 @@ function setCanonical(url) {
   el.setAttribute('href', url)
 }
 
+function setRobots(noindex) {
+  let el = document.head.querySelector('meta[name="robots"]')
+  if (!noindex) { if (el) el.remove(); return }
+  if (!el) {
+    el = document.createElement('meta')
+    el.setAttribute('name', 'robots')
+    document.head.appendChild(el)
+  }
+  el.setAttribute('content', 'noindex, nofollow')
+}
+
+function setJsonLd(data) {
+  let el = document.head.querySelector('script[data-seo-jsonld]')
+  if (!data) { if (el) el.remove(); return }
+  if (!el) {
+    el = document.createElement('script')
+    el.type = 'application/ld+json'
+    el.setAttribute('data-seo-jsonld', '')
+    document.head.appendChild(el)
+  }
+  el.textContent = JSON.stringify(data)
+}
+
 // Renders no DOM; imperatively syncs the document.title, canonical URL,
-// og:*, and twitter:* meta tags whenever its props change.
-export default function Meta({ title, description, image, path, type, article }) {
+// og:*, twitter:*, robots, and JSON-LD tags whenever its props change.
+export default function Meta({ title, description, image, path, type, article, noindex, jsonLd }) {
   useEffect(() => {
     const t = title ? `${title} · I'm Ananth` : DEFAULTS.title
     const d = description || DEFAULTS.description
@@ -44,6 +67,8 @@ export default function Meta({ title, description, image, path, type, article })
     document.title = t
     setMeta('description', d)
     setCanonical(url)
+    setRobots(noindex)
+    setJsonLd(jsonLd)
 
     setMeta('og:title', t, true)
     setMeta('og:description', d, true)
@@ -72,7 +97,7 @@ export default function Meta({ title, description, image, path, type, article })
         })
       }
     }
-  }, [title, description, image, path, type, article])
+  }, [title, description, image, path, type, article, noindex, jsonLd])
 
   return null
 }

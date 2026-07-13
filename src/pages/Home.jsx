@@ -7,6 +7,7 @@ import Meta from '../components/Meta.jsx'
 import DailyQuote from '../components/DailyQuote.jsx'
 import EmptyState from '../components/EmptyState.jsx'
 import { useLiveData } from '../lib/bus.js'
+import { siteJsonLd } from '../lib/jsonld.js'
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V']
 
@@ -41,7 +42,7 @@ export default function Home({ sections }) {
 
       <DailyQuote />
 
-      <Meta />
+      <Meta jsonLd={siteJsonLd()} />
       {sections.map((s, i) => {
         const owner = isOwner()
         const items = load(s.key).filter(p => owner || isLivePost(p)).slice(0, 3)
@@ -60,7 +61,7 @@ export default function Home({ sections }) {
                 <div className="grid">
                   {items.map(p => (
                     <Link key={p.id} to={`/${s.key}/${p.id}`} className="card">
-                      {p.image && <img src={p.image} alt="" />}
+                      {p.image && <img src={p.image} alt={stripHtml(p.title)} />}
                       <div className="meta">{formatDate(p.createdAt)}</div>
                       <h3 dangerouslySetInnerHTML={{ __html: stripHtml(p.title) }} />
                       <p>{stripHtml(p.body || p.caption || '').slice(0, 120)}{stripHtml(p.body || p.caption || '').length > 120 ? '…' : ''}</p>
