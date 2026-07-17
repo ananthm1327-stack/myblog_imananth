@@ -25,7 +25,11 @@ export async function uploadImage(file, sectionKey) {
   const { error } = await client.storage
     .from(BUCKET)
     .upload(path, file, {
-      cacheControl: '3600',
+      // Object paths embed a timestamp + random suffix, so a given URL is
+      // effectively immutable — safe to cache aggressively at the CDN
+      // edge so most image loads become cache hits (billed separately and
+      // far cheaper) instead of counting against origin egress.
+      cacheControl: '31536000, immutable',
       upsert: false,
       contentType: file.type || 'image/jpeg'
     })
