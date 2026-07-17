@@ -1,4 +1,5 @@
 import { pushPost, pushDelete, pushComment, pushCommentUpdate, pushCommentDelete } from './lib/sync.js'
+import { deleteImageByUrl } from './lib/storage.js'
 
 const KEYS = {
   journal: 'ia_journal',
@@ -79,9 +80,13 @@ export function isScheduled(p) {
 }
 
 export function deletePost(key, id) {
+  const existing = load(key).find(p => p.id === id)
   const items = load(key).filter(p => p.id !== id)
   save(key, items)
   pushDelete(key, id)
+  // Free the Storage object too, so deleted posts don't leave orphan images
+  // eating quota. Best-effort — Storage delete is fire-and-forget.
+  if (existing?.image) deleteImageByUrl(existing.image)
 }
 
 export function getPost(key, id) {

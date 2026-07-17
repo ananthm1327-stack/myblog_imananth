@@ -117,3 +117,49 @@ begin
     alter publication supabase_realtime add table comments;
   end if;
 end $$;
+
+-- 6. Storage bucket for post images ----------------------------
+-- Images used to be stored as base64 text directly inside posts.image,
+-- which bloated every read (a single 3MB photo re-transmitted on every
+-- 45s poll from every open tab is how the free-tier egress got burned
+-- through). Uploads now go to Storage; posts.image holds just the
+-- public URL. The base64 column is preserved for backward compatibility
+-- with any un-migrated rows.
+insert into storage.buckets (id, name, public)
+values ('post-images', 'post-images', true)
+on conflict (id) do update set public = true;
+
+-- Public read of images (needed for browsers loading <img src="...">).
+drop policy if exists "post_images_public_read" on storage.objects;
+create policy "post_images_public_read"
+  on storage.objects for select
+  using (bucket_id = 'post-images');
+
+-- Owner-only write/delete on the bucket, gated by the same x-owner-token
+-- header check used for posts/comments.
+drop policy if exists "post_images_owner_write" on storage.objects;
+create policy "post_images_owner_write"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'post-images'
+    and current_setting('request.headers', true)::json->>'x-owner-token' is not null
+    and current_setting('request.headers', true)::json->>'x-owner-token' <> ''
+  );
+
+drop policy if exists "post_images_owner_update" on storage.objects;
+create policy "post_images_owner_update"
+  on storage.objects for update
+  using (
+    bucket_id = 'post-images'
+    and current_setting('request.headers', true)::json->>'x-owner-token' is not null
+    and current_setting('request.headers', true)::json->>'x-owner-token' <> ''
+  );
+
+drop policy if exists "post_images_owner_delete" on storage.objects;
+create policy "post_images_owner_delete"
+  on storage.objects for delete
+  using (
+    bucket_id = 'post-images'
+    and current_setting('request.headers', true)::json->>'x-owner-token' is not null
+    and current_setting('request.headers', true)::json->>'x-owner-token' <> ''
+  );

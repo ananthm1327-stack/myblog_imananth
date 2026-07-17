@@ -13,6 +13,7 @@ import Meta from '../components/Meta.jsx'
 import { stripHtml } from '../lib/sanitize.js'
 import { useLiveData } from '../lib/bus.js'
 import { toast } from '../lib/toast.js'
+import { uploadImage } from '../lib/storage.js'
 
 const SECTION_NUMERAL = { journal: 'I', photos: 'II', experiences: 'III', articles: 'IV', views: 'V' }
 const SECTION_DESCRIPTIONS = {
@@ -217,8 +218,9 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
   const [status, setStatus] = useState(existing?.status || 'published')
   const [publishAt, setPublishAt] = useState(toLocalInput(existing?.publishAt))
   const [fieldErrors, setFieldErrors] = useState({})
+  const [uploading, setUploading] = useState(false)
 
-  const onFile = (e) => {
+  const onFile = async (e) => {
     const f = e.target.files?.[0]
     if (!f) return
     if (!f.type.startsWith('image/')) {
@@ -229,9 +231,16 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
       toast.error('Image is too large (max 6MB). Try a smaller file.')
       return
     }
-    const reader = new FileReader()
-    reader.onload = () => setImage(reader.result)
-    reader.readAsDataURL(f)
+    setUploading(true)
+    try {
+      const publicUrl = await uploadImage(f, sectionKey)
+      setImage(publicUrl)
+    } catch (err) {
+      console.warn('[upload] failed', err)
+      toast.error("Couldn't upload the image. Please try again.")
+    } finally {
+      setUploading(false)
+    }
   }
 
   const validate = () => {
@@ -299,7 +308,8 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
           )}
 
           <label>{isPhotos ? 'Photo' : 'Image (optional)'}</label>
-          <input type="file" accept="image/*" onChange={onFile} />
+          <input type="file" accept="image/*" onChange={onFile} disabled={uploading} />
+          {uploading && <div className="form-hint" style={{ marginTop: 6 }}>Uploading…</div>}
           {fieldErrors.image && <div className="field-error">{fieldErrors.image}</div>}
           {image && <img src={image} alt="" style={{ maxWidth: '100%', marginTop: 12 }} />}
 
@@ -351,8 +361,10 @@ function PostForm({ sectionKey, isPhotos, existing, onClose, onSaved }) {
             </>
           )}
 
-          <button className="btn" type="submit">
-            {existing ? 'Save changes' : (status === 'draft' ? 'Save draft' : 'Publish')}
+          <button className="btn" type="submit" disabled={uploading}>
+            {uploading
+              ? 'Uploading image…'
+              : existing ? 'Save changes' : (status === 'draft' ? 'Save draft' : 'Publish')}
           </button>
         </form>
       </div>

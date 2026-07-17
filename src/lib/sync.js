@@ -16,7 +16,14 @@ import { emitDataChange } from './bus.js'
 import { toast } from './toast.js'
 
 const SECTION_KEYS = ['journal', 'photos', 'experiences', 'articles', 'views']
-const POLL_INTERVAL_MS = 45_000
+// The primary sync mechanisms are realtime (postgres_changes) and lifecycle
+// re-pulls (online/visibilitychange). This poll is only a safety net for
+// devices where realtime is blocked (some corporate networks, older browsers).
+// It used to run every 45s, which — combined with base64 images in the DB —
+// re-transmitted MBs on every tick from every open tab and burned through
+// the free-tier egress. 10 minutes is enough for a fallback; if realtime
+// works (the common case), this timer barely matters.
+const POLL_INTERVAL_MS = 600_000
 
 function lsKey(section) { return `ia_${section}` }
 function saveLocal(section, items) {
