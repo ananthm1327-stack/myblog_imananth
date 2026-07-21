@@ -3604,6 +3604,12 @@ a.ct-method:hover .ct-method-icon { background: var(--gold); color: #fff; }
 }
 .sub-row input {
   flex: 1;
+  /* Browsers give <input> a default minimum intrinsic width (usually
+     ~150-220px based on the `size` attr / UA styles), which blocks
+     flex-shrink on narrow viewports and pushes the sibling Subscribe
+     button off the right edge of its container. min-width: 0 lets flex
+     actually shrink the input to fit. */
+  min-width: 0;
   padding: 12px 14px;
   border: none;
   outline: none;
@@ -3612,6 +3618,7 @@ a.ct-method:hover .ct-method-icon { background: var(--gold); color: #fff; }
   font-family: inherit;
   font-size: 14px;
 }
+.sub-row button { flex-shrink: 0; }
 .sub-row input::placeholder { color: var(--titanium) !important; opacity: 0.7; }
 .sub-row button {
   padding: 12px 22px;
@@ -3774,13 +3781,27 @@ a.ct-method:hover .ct-method-icon { background: var(--gold); color: #fff; }
   color: var(--titanium-dark);
   font-size: 15px;
 }
-.legal-foot a { color: var(--gold-deep); text-decoration: underline; text-underline-offset: 3px; }
+.legal-foot a {
+  color: var(--gold-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  /* Long email/URL tokens can't break inside a normal word — force them
+     to wrap on narrow phones so they don't push the container wider than
+     the viewport. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 .legal-foot a:hover { color: var(--gold); }
+/* Same protection for any inline link in legal body paragraphs. */
+.legal-section a { overflow-wrap: anywhere; word-break: break-word; }
 
 @media (max-width: 640px) {
+  .legal-title { font-size: clamp(28px, 8vw, 42px); }  /* Terms & Conditions no longer overflows narrow phones */
   .legal-section h2 { font-size: 22px; }
   .legal-section p { font-size: 16px; }
   .legal-intro { font-size: 17px; }
+  .legal-foot { padding: 20px 16px; font-size: 14px; }
+  .legal-head { padding-bottom: 24px; margin-bottom: 30px; }
 }
 .footer-made .heart { color: var(--gold-deep) !important; font-size: 14px; }
 
