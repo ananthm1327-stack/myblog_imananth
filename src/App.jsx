@@ -218,10 +218,13 @@ export default function App() {
             <path d="M46 120 L120 128 L194 120 L120 112 Z" fill="#c8a24b" stroke="none" opacity="0.4" />
             <circle cx="120" cy="120" r="6" fill="#c8a24b" stroke="none" opacity="0.75" />
             {/* Roman numerals — cardinals */}
-            <text x="120" y="20"  textAnchor="middle" fontFamily="Cormorant Garamond, serif" fontSize="14" fontWeight="600" fill="#a8842f" opacity="0.85">N</text>
-            <text x="120" y="235" textAnchor="middle" fontFamily="Cormorant Garamond, serif" fontSize="14" fontWeight="600" fill="#a8842f" opacity="0.85">S</text>
-            <text x="18"  y="125" textAnchor="middle" fontFamily="Cormorant Garamond, serif" fontSize="14" fontWeight="600" fill="#a8842f" opacity="0.85">W</text>
-            <text x="222" y="125" textAnchor="middle" fontFamily="Cormorant Garamond, serif" fontSize="14" fontWeight="600" fill="#a8842f" opacity="0.85">E</text>
+            {/* N/S/E/W nested into the empty band between the compass rose tips
+                (r=74) and the outer curved-text ring (r=106) so they no longer
+                collide with the site-name text that wraps the outer ring. */}
+            <text x="120" y="38"  textAnchor="middle" dominantBaseline="middle" fontFamily="Cormorant Garamond, serif" fontSize="11" fontWeight="600" fill="#a8842f" opacity="0.9">N</text>
+            <text x="120" y="204" textAnchor="middle" dominantBaseline="middle" fontFamily="Cormorant Garamond, serif" fontSize="11" fontWeight="600" fill="#a8842f" opacity="0.9">S</text>
+            <text x="36"  y="122" textAnchor="middle" dominantBaseline="middle" fontFamily="Cormorant Garamond, serif" fontSize="11" fontWeight="600" fill="#a8842f" opacity="0.9">W</text>
+            <text x="204" y="122" textAnchor="middle" dominantBaseline="middle" fontFamily="Cormorant Garamond, serif" fontSize="11" fontWeight="600" fill="#a8842f" opacity="0.9">E</text>
           </g>
           {/* Curved text around the outer ring */}
           <text fontFamily="Inter, sans-serif" fontSize="9" letterSpacing="4" fill="#c8a24b" opacity="0.7">
