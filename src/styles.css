@@ -1261,19 +1261,28 @@ main {
   margin-bottom: 12px;
 }
 .signature-img {
+  /* Rendered as an <img> whose src is /signature.png. The container
+     stays a fixed 260x80 box so section layout doesn't jump if the
+     asset is momentarily missing; object-fit keeps the ink centered
+     inside that box. filter chain turns a dark-ink source PNG into
+     the site's gold — much more robust than the previous CSS-mask
+     approach, which silently produced an empty box when the mask
+     image's alpha channel wasn't set up exactly how mask expects. */
   width: 260px;
   height: 80px;
   display: block;
-  background-color: #c8a24b;
-  -webkit-mask-image: url('/signature.png');
-  mask-image: url('/signature.png');
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: right center;
-  mask-position: right center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  filter: drop-shadow(0 2px 4px rgba(200, 162, 75, 0.2));
+  margin-left: auto;
+  object-fit: contain;
+  object-position: right center;
+  /* Dark ink → site gold (#c8a24b). Chain: greyscale to strip color,
+     sepia to warm it, saturate + hue-rotate to land on the gold. */
+  filter:
+    grayscale(1)
+    sepia(1)
+    saturate(3.2)
+    hue-rotate(-14deg)
+    brightness(0.95)
+    drop-shadow(0 2px 4px rgba(200, 162, 75, 0.2));
 }
 .signature-caption {
   font-family: 'Cormorant Garamond', serif;

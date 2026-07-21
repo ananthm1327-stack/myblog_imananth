@@ -114,9 +114,9 @@ export default function PostDetail({ sectionKey, label }) {
 
       <div className="signature-block">
         <div className="signature-line" aria-hidden="true" />
-        <div
-          role="img"
-          aria-label="Signed, Ananth Machiraju"
+        <img
+          src="/signature.png"
+          alt="Signed, Ananth Machiraju"
           className="signature-img"
         />
         <div className="signature-caption">Ananth Machiraju</div>
