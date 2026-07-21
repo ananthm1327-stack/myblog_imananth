@@ -8,6 +8,7 @@ import Contact from './pages/Contact.jsx'
 import About from './pages/About.jsx'
 import Moderation from './pages/Moderation.jsx'
 import Bookmarks from './pages/Bookmarks.jsx'
+import Legal from './pages/Legal.jsx'
 import Footer from './components/Footer.jsx'
 import Meta from './components/Meta.jsx'
 import SearchOverlay from './components/SearchOverlay.jsx'
@@ -285,6 +286,9 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/moderation" element={<Moderation />} />
+          <Route path="/privacy" element={<Legal slug="privacy" />} />
+          <Route path="/disclaimer" element={<Legal slug="disclaimer" />} />
+          <Route path="/terms" element={<Legal slug="terms" />} />
         </Routes>
       </main>
 

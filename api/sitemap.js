@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   const siteUrl = (process.env.VITE_SITE_URL || `https://${req.headers.host}`).replace(/\/$/, '')
   const now = new Date().toISOString().slice(0, 10)
 
-  const staticPages = ['', '/about', '/contact', ...SECTIONS.map(s => `/${s}`)]
+  const staticPages = ['', '/about', '/contact', '/privacy', '/disclaimer', '/terms', ...SECTIONS.map(s => `/${s}`)]
   const urls = staticPages.map(path =>
     `  <url><loc>${siteUrl}${path}</loc><lastmod>${now}</lastmod><changefreq>weekly</changefreq></url>`
   )

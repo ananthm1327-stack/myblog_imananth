@@ -382,7 +382,7 @@ ${rssItems}
 // ----- SITEMAP -----
 export function generateSitemap(siteUrl = SITE_URL) {
   const now = new Date().toISOString().slice(0, 10)
-  const staticPages = ['', '/about', '/contact',
+  const staticPages = ['', '/about', '/contact', '/privacy', '/disclaimer', '/terms',
     ...SECTIONS_META.map(s => `/${s.key}`)]
   const urls = staticPages.map(path =>
     `  <url><loc>${siteUrl}${path}</loc><lastmod>${now}</lastmod><changefreq>weekly</changefreq></url>`

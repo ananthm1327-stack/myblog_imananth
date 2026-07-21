@@ -160,6 +160,14 @@ export default function Footer() {
           <span className="footer-divider-line" />
         </div>
 
+        <div className="footer-legal">
+          <Link to="/privacy">Privacy</Link>
+          <span aria-hidden="true">&middot;</span>
+          <Link to="/disclaimer">Disclaimer</Link>
+          <span aria-hidden="true">&middot;</span>
+          <Link to="/terms">Terms</Link>
+        </div>
+
         <div className="footer-bottom">
           <div className="footer-copy">
             &copy; {new Date().getFullYear()} I'm Ananth &middot; All words, photos &amp; views by Ananth Machiraju
