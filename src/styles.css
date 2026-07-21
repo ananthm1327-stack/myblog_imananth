@@ -1004,11 +1004,20 @@ main {
   margin: 0;
 }
 
-/* "View all" chip — sits in the top-right of each section header, right
-   where the giant italic .section-watermark also lands. Without a
-   backdrop, gold link text and gold stroked watermark letters overlap
-   and read as noise (see fix commit). Paper backdrop + z-index lift
-   makes the link punch cleanly above the watermark. */
+/* "View all" chip — now placed at the bottom-right of each home section
+   (below the 3-card preview grid) as a next-step CTA, instead of sitting
+   in the header where it competed with the .section-watermark. The chip
+   itself keeps the paper-backdrop + z-index lift treatment so it also
+   works when a section-watermark tail extends into the same area. */
+.section-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+@media (max-width: 480px) {
+  .section-footer { justify-content: center; margin-top: 20px; }
+}
+
 .view-all-link {
   position: relative;
   z-index: 1;

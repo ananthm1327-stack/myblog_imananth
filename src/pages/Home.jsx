@@ -53,21 +53,25 @@ export default function Home({ sections }) {
               <span className="section-watermark" aria-hidden="true">{s.label}</span>
               <div className="section-header">
                 <h2>{s.label}</h2>
-                <Link to={`/${s.key}`} className="view-all-link">View all &rarr;</Link>
               </div>
               {items.length === 0 ? (
                 <EmptyState />
               ) : (
-                <div className="grid">
-                  {items.map(p => (
-                    <Link key={p.id} to={`/${s.key}/${p.id}`} className="card">
-                      {p.image && <img src={p.image} alt={stripHtml(p.title)} />}
-                      <div className="meta">{formatDate(p.createdAt)}</div>
-                      <h3 dangerouslySetInnerHTML={{ __html: stripHtml(p.title) }} />
-                      <p>{stripHtml(p.body || p.caption || '').slice(0, 120)}{stripHtml(p.body || p.caption || '').length > 120 ? '…' : ''}</p>
-                    </Link>
-                  ))}
-                </div>
+                <>
+                  <div className="grid">
+                    {items.map(p => (
+                      <Link key={p.id} to={`/${s.key}/${p.id}`} className="card">
+                        {p.image && <img src={p.image} alt={stripHtml(p.title)} />}
+                        <div className="meta">{formatDate(p.createdAt)}</div>
+                        <h3 dangerouslySetInnerHTML={{ __html: stripHtml(p.title) }} />
+                        <p>{stripHtml(p.body || p.caption || '').slice(0, 120)}{stripHtml(p.body || p.caption || '').length > 120 ? '…' : ''}</p>
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="section-footer">
+                    <Link to={`/${s.key}`} className="view-all-link">View all &rarr;</Link>
+                  </div>
+                </>
               )}
             </section>
           </Fragment>
