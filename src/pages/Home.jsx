@@ -19,7 +19,7 @@ export default function Home({ sections }) {
         <div className="hero-glow" aria-hidden="true" />
         <div className="hero-monogram" aria-hidden="true">A</div>
         <div className="hero-inner">
-          <div className="hero-eyebrow">Writer &middot; Photographer &middot; Observer</div>
+          <div className="hero-eyebrow">Writer &middot; Photographer &middot; Moto Traveller</div>
           <h1 className="hero-title">
             <span className="hero-title-line">I'm</span>
             <span className="hero-title-name shiny-text" data-text="Ananth">Ananth</span>
