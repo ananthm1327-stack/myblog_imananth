@@ -576,7 +576,12 @@ h1, h2, h3, h4 {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--white);
+  /* No background here — the fixed .site-bg layer (paper gradient +
+     ornament + aurorae + grain + vignette) needs to show through. When
+     .app had `background: var(--white)`, .site-bg's z-index: -10 put
+     everything on it BEHIND that solid white sheet, silently hiding
+     every background element (aurorae included) for the whole life of
+     the site. */
 }
 
 /* NAVBAR */
