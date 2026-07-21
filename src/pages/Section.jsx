@@ -122,6 +122,7 @@ export default function Section({ sectionKey, label }) {
                 </div>
                 {owner && (
                   <div className="photo-owner-actions">
+                    <button className="btn small" onClick={() => { setEditing(p); setShowForm(true) }}>Edit</button>
                     <button className="btn small" onClick={() => togglePublish(p)}>
                       {p.status === 'draft' ? 'Publish' : 'Draft'}
                     </button>
