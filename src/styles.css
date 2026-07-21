@@ -427,8 +427,69 @@ html, body {
   background: radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(74,79,82,0.12) 100%);
 }
 
+/* --- Extra background flourish, all fixed to viewport, all pointer-events:none via .site-bg --- */
+
+/* A single faint vertical hairline about 9% from the left edge, like a
+   traditional journal margin rule. Faded out at top/bottom so it never
+   competes with the nav or footer. Desktop only. */
+.site-bg-margin-line {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 9%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent 0%, rgba(200,162,75,0.14) 20%, rgba(200,162,75,0.14) 80%, transparent 100%);
+}
+@media (max-width: 900px) { .site-bg-margin-line { display: none; } }
+
+/* Small ornate corner brackets in each of the four viewport corners.
+   Anchored to the fixed .site-bg layer so they hold their position while
+   the page scrolls, framing the reading area like an old book plate. */
+.site-bg-corner {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  opacity: 0.55;
+  filter: drop-shadow(0 2px 4px rgba(200,162,75,0.1));
+}
+.corner-tl { top: 12px;    left: 12px;    }
+.corner-tr { top: 12px;    right: 12px;   }
+.corner-bl { bottom: 12px; left: 12px;    }
+.corner-br { bottom: 12px; right: 12px;   }
+@media (max-width: 760px) {
+  .site-bg-corner { width: 72px; height: 72px; opacity: 0.35; }
+}
+
+/* A scattered constellation of the site's signature diamond, slowly
+   twinkling. Each star has its own drift + fade cycle so nothing lines
+   up rhythmically. Sizes and positions are carefully tuned so nothing
+   sits behind the hero name / footer / nav. */
+.site-bg-constellation { position: absolute; inset: 0; }
+.bg-star {
+  position: absolute;
+  color: var(--gold);
+  line-height: 1;
+  opacity: 0;
+  animation: starTwinkle 9s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(200,162,75,0.35));
+}
+.bg-star.s1 { top: 14%;  left: 18%; font-size: 10px; animation-delay:  0s;   animation-duration: 11s; }
+.bg-star.s2 { top: 22%;  left: 74%; font-size: 14px; animation-delay:  2.5s; animation-duration:  9s; }
+.bg-star.s3 { top: 38%;  left: 6%;  font-size: 9px;  animation-delay:  4s;   animation-duration: 12s; }
+.bg-star.s4 { top: 44%;  left: 92%; font-size: 12px; animation-delay:  1s;   animation-duration: 10s; }
+.bg-star.s5 { top: 58%;  left: 30%; font-size: 11px; animation-delay:  6s;   animation-duration: 13s; }
+.bg-star.s6 { top: 66%;  left: 80%; font-size: 9px;  animation-delay:  3s;   animation-duration: 11s; }
+.bg-star.s7 { top: 82%;  left: 15%; font-size: 12px; animation-delay:  5.5s; animation-duration: 10s; }
+.bg-star.s8 { top: 88%;  left: 62%; font-size: 10px; animation-delay:  1.5s; animation-duration: 12s; }
+.bg-star.s9 { top: 30%;  left: 50%; font-size: 8px;  animation-delay:  7s;   animation-duration: 14s; }
+@keyframes starTwinkle {
+  0%   { opacity: 0;   transform: translate3d(0, 0, 0) scale(0.85); }
+  50%  { opacity: 0.55; transform: translate3d(0, -6px, 0) scale(1); }
+  100% { opacity: 0;   transform: translate3d(0, 0, 0) scale(0.85); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .site-bg-aurora { animation: none; }
+  .bg-star { animation: none; opacity: 0.28; }
 }
 
 a { color: var(--titanium-dark); text-decoration: none; }

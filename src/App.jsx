@@ -159,9 +159,60 @@ export default function App() {
       <div className="site-bg" aria-hidden="true">
         <div className="site-bg-paper" />
         <div className="site-bg-rules" />
+        <div className="site-bg-margin-line" />
         <div className="site-bg-aurora aurora-a" />
         <div className="site-bg-aurora aurora-b" />
         <div className="site-bg-aurora aurora-c" />
+
+        <svg className="site-bg-corner corner-tl" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#c8a24b" strokeWidth="1.1" strokeLinecap="round">
+            <path d="M8 8 L8 44" opacity="0.6" />
+            <path d="M8 8 L44 8" opacity="0.6" />
+            <path d="M8 8 Q34 8, 44 20 Q56 32, 56 56" opacity="0.55" />
+            <circle cx="56" cy="56" r="3" fill="#c8a24b" stroke="none" opacity="0.7" />
+            <path d="M50 50 L56 44 L62 50 L56 56 Z" fill="#c8a24b" stroke="none" opacity="0.5" />
+          </g>
+        </svg>
+        <svg className="site-bg-corner corner-tr" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#c8a24b" strokeWidth="1.1" strokeLinecap="round">
+            <path d="M112 8 L112 44" opacity="0.6" />
+            <path d="M112 8 L76 8" opacity="0.6" />
+            <path d="M112 8 Q86 8, 76 20 Q64 32, 64 56" opacity="0.55" />
+            <circle cx="64" cy="56" r="3" fill="#c8a24b" stroke="none" opacity="0.7" />
+            <path d="M58 50 L64 44 L70 50 L64 56 Z" fill="#c8a24b" stroke="none" opacity="0.5" />
+          </g>
+        </svg>
+        <svg className="site-bg-corner corner-bl" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#c8a24b" strokeWidth="1.1" strokeLinecap="round">
+            <path d="M8 112 L8 76" opacity="0.6" />
+            <path d="M8 112 L44 112" opacity="0.6" />
+            <path d="M8 112 Q34 112, 44 100 Q56 88, 56 64" opacity="0.55" />
+            <circle cx="56" cy="64" r="3" fill="#c8a24b" stroke="none" opacity="0.7" />
+            <path d="M50 70 L56 64 L62 70 L56 76 Z" fill="#c8a24b" stroke="none" opacity="0.5" />
+          </g>
+        </svg>
+        <svg className="site-bg-corner corner-br" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#c8a24b" strokeWidth="1.1" strokeLinecap="round">
+            <path d="M112 112 L112 76" opacity="0.6" />
+            <path d="M112 112 L76 112" opacity="0.6" />
+            <path d="M112 112 Q86 112, 76 100 Q64 88, 64 64" opacity="0.55" />
+            <circle cx="64" cy="64" r="3" fill="#c8a24b" stroke="none" opacity="0.7" />
+            <path d="M58 70 L64 64 L70 70 L64 76 Z" fill="#c8a24b" stroke="none" opacity="0.5" />
+          </g>
+        </svg>
+
+        <div className="site-bg-constellation">
+          <span className="bg-star s1">&#10022;</span>
+          <span className="bg-star s2">&#10022;</span>
+          <span className="bg-star s3">&#10022;</span>
+          <span className="bg-star s4">&#10022;</span>
+          <span className="bg-star s5">&#10022;</span>
+          <span className="bg-star s6">&#10022;</span>
+          <span className="bg-star s7">&#10022;</span>
+          <span className="bg-star s8">&#10022;</span>
+          <span className="bg-star s9">&#10022;</span>
+        </div>
+
         <div className="site-bg-grain" />
         <div className="site-bg-vignette" />
       </div>
