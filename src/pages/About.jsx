@@ -186,9 +186,9 @@ export default function About() {
 
         <div className="about-signature signature-block">
           <div className="signature-line" aria-hidden="true" />
-          <img
-            src="/signature.png"
-            alt="Signed, Ananth Machiraju"
+          <div
+            role="img"
+            aria-label="Signed, Ananth Machiraju"
             className="signature-img"
           />
           <div className="signature-caption">Ananth Machiraju</div>
