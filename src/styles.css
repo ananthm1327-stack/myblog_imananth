@@ -1004,6 +1004,40 @@ main {
   margin: 0;
 }
 
+/* "View all" chip — sits in the top-right of each section header, right
+   where the giant italic .section-watermark also lands. Without a
+   backdrop, gold link text and gold stroked watermark letters overlap
+   and read as noise (see fix commit). Paper backdrop + z-index lift
+   makes the link punch cleanly above the watermark. */
+.view-all-link {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gold-deep) !important;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  background: rgba(251, 250, 246, 0.92);
+  border: 1px solid rgba(200, 162, 75, 0.25);
+  border-radius: 2px;
+  transition: background .18s, border-color .18s, color .18s, transform .18s;
+  white-space: nowrap;
+}
+.view-all-link:hover {
+  background: var(--gold);
+  color: #fff !important;
+  border-color: var(--gold);
+  transform: translateX(2px);
+}
+@media (max-width: 480px) {
+  .view-all-link { padding: 6px 10px; font-size: 11px; letter-spacing: 1.5px; }
+}
+
 /* CARDS */
 .grid {
   display: grid;

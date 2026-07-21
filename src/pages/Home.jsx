@@ -53,7 +53,7 @@ export default function Home({ sections }) {
               <span className="section-watermark" aria-hidden="true">{s.label}</span>
               <div className="section-header">
                 <h2>{s.label}</h2>
-                <Link to={`/${s.key}`} style={{ color: 'var(--gold-deep)', fontSize: 13, letterSpacing: 2, textTransform: 'uppercase' }}>View all &rarr;</Link>
+                <Link to={`/${s.key}`} className="view-all-link">View all &rarr;</Link>
               </div>
               {items.length === 0 ? (
                 <EmptyState />
