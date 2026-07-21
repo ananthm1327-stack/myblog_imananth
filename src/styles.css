@@ -349,7 +349,13 @@ input.has-error:focus, textarea.has-error:focus {
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--paper);
+  /* No background here. .site-bg already provides the same paper
+     gradient as its base layer PLUS all the ornament on top. Setting
+     any background on body paints an opaque sheet ABOVE .site-bg
+     (which sits at z-index: -10) — negative-z-index elements paint
+     below body's content but ABOVE the canvas, so body's own
+     background covers them. The full-viewport preloader covers
+     first-paint anyway, so there's no flash-of-white risk. */
   color: var(--titanium);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.6;
