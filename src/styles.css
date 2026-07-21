@@ -437,32 +437,27 @@ html, body {
   top: 0; bottom: 0;
   left: 9%;
   width: 1px;
-  background: linear-gradient(180deg, transparent 0%, rgba(200,162,75,0.14) 20%, rgba(200,162,75,0.14) 80%, transparent 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(200,162,75,0.24) 20%, rgba(200,162,75,0.24) 80%, transparent 100%);
 }
 @media (max-width: 900px) { .site-bg-margin-line { display: none; } }
 
-/* Small ornate corner brackets in each of the four viewport corners.
-   Anchored to the fixed .site-bg layer so they hold their position while
-   the page scrolls, framing the reading area like an old book plate. */
+/* Ornate corner brackets. Bumped up so they read as actual page frame. */
 .site-bg-corner {
   position: absolute;
-  width: 120px;
-  height: 120px;
-  opacity: 0.55;
-  filter: drop-shadow(0 2px 4px rgba(200,162,75,0.1));
+  width: 140px;
+  height: 140px;
+  opacity: 0.8;
+  filter: drop-shadow(0 2px 4px rgba(200,162,75,0.15));
 }
-.corner-tl { top: 12px;    left: 12px;    }
-.corner-tr { top: 12px;    right: 12px;   }
-.corner-bl { bottom: 12px; left: 12px;    }
-.corner-br { bottom: 12px; right: 12px;   }
+.corner-tl { top: 14px;    left: 14px;    }
+.corner-tr { top: 14px;    right: 14px;   }
+.corner-bl { bottom: 14px; left: 14px;    }
+.corner-br { bottom: 14px; right: 14px;   }
 @media (max-width: 760px) {
-  .site-bg-corner { width: 72px; height: 72px; opacity: 0.35; }
+  .site-bg-corner { width: 78px; height: 78px; opacity: 0.55; }
 }
 
-/* A scattered constellation of the site's signature diamond, slowly
-   twinkling. Each star has its own drift + fade cycle so nothing lines
-   up rhythmically. Sizes and positions are carefully tuned so nothing
-   sits behind the hero name / footer / nav. */
+/* Constellation — brighter, bigger, more of them. */
 .site-bg-constellation { position: absolute; inset: 0; }
 .bg-star {
   position: absolute;
@@ -470,26 +465,101 @@ html, body {
   line-height: 1;
   opacity: 0;
   animation: starTwinkle 9s ease-in-out infinite;
-  filter: drop-shadow(0 0 6px rgba(200,162,75,0.35));
+  filter: drop-shadow(0 0 8px rgba(200,162,75,0.5));
 }
-.bg-star.s1 { top: 14%;  left: 18%; font-size: 10px; animation-delay:  0s;   animation-duration: 11s; }
-.bg-star.s2 { top: 22%;  left: 74%; font-size: 14px; animation-delay:  2.5s; animation-duration:  9s; }
-.bg-star.s3 { top: 38%;  left: 6%;  font-size: 9px;  animation-delay:  4s;   animation-duration: 12s; }
-.bg-star.s4 { top: 44%;  left: 92%; font-size: 12px; animation-delay:  1s;   animation-duration: 10s; }
-.bg-star.s5 { top: 58%;  left: 30%; font-size: 11px; animation-delay:  6s;   animation-duration: 13s; }
-.bg-star.s6 { top: 66%;  left: 80%; font-size: 9px;  animation-delay:  3s;   animation-duration: 11s; }
-.bg-star.s7 { top: 82%;  left: 15%; font-size: 12px; animation-delay:  5.5s; animation-duration: 10s; }
-.bg-star.s8 { top: 88%;  left: 62%; font-size: 10px; animation-delay:  1.5s; animation-duration: 12s; }
-.bg-star.s9 { top: 30%;  left: 50%; font-size: 8px;  animation-delay:  7s;   animation-duration: 14s; }
+.bg-star.s1  { top: 14%; left: 18%; font-size: 12px; animation-delay: 0s;   animation-duration: 11s; }
+.bg-star.s2  { top: 22%; left: 74%; font-size: 16px; animation-delay: 2.5s; animation-duration:  9s; }
+.bg-star.s3  { top: 38%; left: 6%;  font-size: 11px; animation-delay: 4s;   animation-duration: 12s; }
+.bg-star.s4  { top: 44%; left: 92%; font-size: 14px; animation-delay: 1s;   animation-duration: 10s; }
+.bg-star.s5  { top: 58%; left: 30%; font-size: 13px; animation-delay: 6s;   animation-duration: 13s; }
+.bg-star.s6  { top: 66%; left: 80%; font-size: 11px; animation-delay: 3s;   animation-duration: 11s; }
+.bg-star.s7  { top: 82%; left: 15%; font-size: 14px; animation-delay: 5.5s; animation-duration: 10s; }
+.bg-star.s8  { top: 88%; left: 62%; font-size: 12px; animation-delay: 1.5s; animation-duration: 12s; }
+.bg-star.s9  { top: 30%; left: 50%; font-size: 10px; animation-delay: 7s;   animation-duration: 14s; }
+.bg-star.s10 { top: 54%; left: 58%; font-size: 12px; animation-delay: 8.5s; animation-duration: 11s; }
+.bg-star.s11 { top: 76%; left: 48%; font-size: 15px; animation-delay: 4.5s; animation-duration: 13s; }
+.bg-star.s12 { top: 10%; left: 42%; font-size: 11px; animation-delay: 2s;   animation-duration: 12s; }
 @keyframes starTwinkle {
-  0%   { opacity: 0;   transform: translate3d(0, 0, 0) scale(0.85); }
-  50%  { opacity: 0.55; transform: translate3d(0, -6px, 0) scale(1); }
-  100% { opacity: 0;   transform: translate3d(0, 0, 0) scale(0.85); }
+  0%   { opacity: 0;    transform: translate3d(0, 0, 0) scale(0.85); }
+  50%  { opacity: 0.85; transform: translate3d(0, -6px, 0) scale(1); }
+  100% { opacity: 0;    transform: translate3d(0, 0, 0) scale(0.85); }
+}
+
+/* Giant italic serif watermark words — a writer's ambient wash. Each is
+   fixed to a viewport corner/edge so they never crash into the section
+   watermarks, hero monogram, or nav. Rotated + huge + very low-opacity
+   stroked text so they read as atmosphere, not headlines. */
+.site-bg-words { position: absolute; inset: 0; }
+.bg-word {
+  position: absolute;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(200,162,75,0.32);
+  letter-spacing: -0.02em;
+  user-select: none;
+}
+.bg-word.bw-1 { top:  6%; left: 55%; font-size: clamp(60px, 8vw, 130px); transform: rotate(-6deg); }
+.bg-word.bw-2 { top: 28%; left:  2%; font-size: clamp(60px, 9vw, 150px); transform: rotate(-14deg); }
+.bg-word.bw-3 { top: 48%; left: 60%; font-size: clamp(48px, 6vw, 96px); transform: rotate(4deg); }
+.bg-word.bw-4 { top: 68%; left:  4%; font-size: clamp(70px, 9vw, 160px); transform: rotate(-8deg); }
+.bg-word.bw-5 { top: 12%; left: -4%; font-size: clamp(60px, 8vw, 140px); transform: rotate(8deg); }
+.bg-word.bw-6 { top: 74%; left: 40%; font-size: clamp(60px, 8vw, 140px); transform: rotate(-4deg); }
+.bg-word.bw-7 { top: 40%; left: 82%; font-size: clamp(50px, 7vw, 110px); transform: rotate(12deg); }
+.bg-word.bw-8 { top: 86%; left: 70%; font-size: clamp(50px, 7vw, 120px); transform: rotate(-10deg); }
+.bg-word.bw-9 { top: 92%; left: 20%; font-size: clamp(50px, 6vw, 100px); transform: rotate(6deg); }
+@media (max-width: 760px) {
+  .bg-word { -webkit-text-stroke-width: 0.6px; }
+  .bg-word.bw-1, .bg-word.bw-5, .bg-word.bw-7, .bg-word.bw-8 { display: none; }
+}
+
+/* Ornate compass seal, fixed on the right, slowly rotating like a
+   turning wax stamp. Feels like the endpaper of a hardback book. */
+.site-bg-seal {
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  top: 42%;
+  right: -80px;
+  opacity: 0.55;
+  transform-origin: center;
+  animation: sealSpin 180s linear infinite;
+}
+@keyframes sealSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@media (max-width: 900px) {
+  .site-bg-seal { width: 220px; height: 220px; top: 60%; right: -90px; opacity: 0.4; }
+}
+@media (max-width: 480px) {
+  .site-bg-seal { display: none; }
+}
+
+/* Hand-drawn quill silhouette in the lower left — a writer's mark. */
+.site-bg-quill {
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  bottom: -20px;
+  left: -50px;
+  opacity: 0.6;
+  transform: rotate(-6deg);
+}
+@media (max-width: 900px) {
+  .site-bg-quill { width: 220px; height: 220px; bottom: 60px; left: -80px; opacity: 0.4; }
+}
+@media (max-width: 480px) {
+  .site-bg-quill { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .site-bg-aurora { animation: none; }
-  .bg-star { animation: none; opacity: 0.28; }
+  .bg-star        { animation: none; opacity: 0.4; }
+  .site-bg-seal   { animation: none; }
 }
 
 a { color: var(--titanium-dark); text-decoration: none; }

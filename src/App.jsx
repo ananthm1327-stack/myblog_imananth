@@ -211,7 +211,85 @@ export default function App() {
           <span className="bg-star s7">&#10022;</span>
           <span className="bg-star s8">&#10022;</span>
           <span className="bg-star s9">&#10022;</span>
+          <span className="bg-star s10">&#10022;</span>
+          <span className="bg-star s11">&#10022;</span>
+          <span className="bg-star s12">&#10022;</span>
         </div>
+
+        {/* Scattered italic script — a writer's ambient wash of the site's own five sections */}
+        <div className="site-bg-words" aria-hidden="true">
+          <span className="bg-word bw-1">words.</span>
+          <span className="bg-word bw-2">observed.</span>
+          <span className="bg-word bw-3">quiet mornings.</span>
+          <span className="bg-word bw-4">journal</span>
+          <span className="bg-word bw-5">photographs</span>
+          <span className="bg-word bw-6">experiences</span>
+          <span className="bg-word bw-7">articles</span>
+          <span className="bg-word bw-8">views</span>
+          <span className="bg-word bw-9">written.</span>
+        </div>
+
+        {/* Ornate compass / postmark seal on the right */}
+        <svg className="site-bg-seal" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <path id="seal-outer" d="M120,120 m-98,0 a98,98 0 1,1 196,0 a98,98 0 1,1 -196,0" />
+          </defs>
+          <g fill="none" stroke="#c8a24b" strokeLinecap="round">
+            <circle cx="120" cy="120" r="112" strokeWidth="1" opacity="0.7" />
+            <circle cx="120" cy="120" r="106" strokeWidth="0.6" opacity="0.5" />
+            <circle cx="120" cy="120" r="74"  strokeWidth="0.8" opacity="0.6" />
+            <circle cx="120" cy="120" r="70"  strokeWidth="0.4" opacity="0.35" />
+            {/* Cardinal ticks */}
+            <line x1="120" y1="10"  x2="120" y2="26"  strokeWidth="1" />
+            <line x1="120" y1="214" x2="120" y2="230" strokeWidth="1" />
+            <line x1="10"  y1="120" x2="26"  y2="120" strokeWidth="1" />
+            <line x1="214" y1="120" x2="230" y2="120" strokeWidth="1" />
+            {/* Ordinal ticks (diagonals) */}
+            <line x1="42"  y1="42"  x2="54"  y2="54"  strokeWidth="0.7" opacity="0.7" />
+            <line x1="198" y1="42"  x2="186" y2="54"  strokeWidth="0.7" opacity="0.7" />
+            <line x1="42"  y1="198" x2="54"  y2="186" strokeWidth="0.7" opacity="0.7" />
+            <line x1="198" y1="198" x2="186" y2="186" strokeWidth="0.7" opacity="0.7" />
+            {/* Compass rose */}
+            <path d="M120 46 L128 120 L120 194 L112 120 Z" fill="#c8a24b" stroke="none" opacity="0.55" />
+            <path d="M46 120 L120 128 L194 120 L120 112 Z" fill="#c8a24b" stroke="none" opacity="0.4" />
+            <circle cx="120" cy="120" r="6" fill="#c8a24b" stroke="none" opacity="0.75" />
+            {/* Roman numerals — cardinals */}
+            <text x="120" y="20"  textAnchor="middle" fontFamily="Cormorant Garamond, serif" fontSize="14" fontWeight="600" fill="#a8842f" opacity="0.85">N</text>
+            <text x="120" y="235" textAnchor="middle" fontFamily="Cormorant Garamond, serif" fontSize="14" fontWeight="600" fill="#a8842f" opacity="0.85">S</text>
+            <text x="18"  y="125" textAnchor="middle" fontFamily="Cormorant Garamond, serif" fontSize="14" fontWeight="600" fill="#a8842f" opacity="0.85">W</text>
+            <text x="222" y="125" textAnchor="middle" fontFamily="Cormorant Garamond, serif" fontSize="14" fontWeight="600" fill="#a8842f" opacity="0.85">E</text>
+          </g>
+          {/* Curved text around the outer ring */}
+          <text fontFamily="Inter, sans-serif" fontSize="9" letterSpacing="4" fill="#c8a24b" opacity="0.7">
+            <textPath href="#seal-outer" startOffset="0">I&#8217;M ANANTH &#183;&#183;&#183; JOURNAL &#183;&#183; PHOTOGRAPHS &#183;&#183; EXPERIENCES &#183;&#183; ARTICLES &#183;&#183; VIEWS &#183;&#183;&#183;</textPath>
+          </text>
+        </svg>
+
+        {/* Quill silhouette in the lower left, drawn as a single ink stroke */}
+        <svg className="site-bg-quill" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#c8a24b" strokeLinecap="round" strokeLinejoin="round">
+            {/* Feather spine */}
+            <path d="M40 220 C 80 180, 130 130, 190 60 Q 210 40, 226 34" strokeWidth="1.6" opacity="0.75" />
+            {/* Feather barbs (top side) */}
+            <path d="M96 174 C 110 158, 122 152, 140 152" strokeWidth="0.7" opacity="0.55" />
+            <path d="M116 154 C 130 138, 144 132, 162 132" strokeWidth="0.7" opacity="0.55" />
+            <path d="M136 134 C 150 118, 164 112, 182 112" strokeWidth="0.7" opacity="0.55" />
+            <path d="M156 114 C 170 98,  184  92, 200  92" strokeWidth="0.7" opacity="0.55" />
+            <path d="M176  94 C 188 78,  200  72, 214  72" strokeWidth="0.7" opacity="0.55" />
+            {/* Feather barbs (bottom side) */}
+            <path d="M96 174 C 110 190, 122 196, 140 196" strokeWidth="0.7" opacity="0.55" />
+            <path d="M116 154 C 130 170, 144 176, 162 176" strokeWidth="0.7" opacity="0.55" />
+            <path d="M136 134 C 150 150, 164 156, 182 156" strokeWidth="0.7" opacity="0.55" />
+            <path d="M156 114 C 170 130, 184 136, 200 136" strokeWidth="0.7" opacity="0.55" />
+            <path d="M176  94 C 188 110, 200 116, 214 116" strokeWidth="0.7" opacity="0.55" />
+            {/* Nib */}
+            <path d="M40 220 L34 232 L32 240 L28 236 Z" fill="#c8a24b" stroke="none" opacity="0.7" />
+            <path d="M40 220 L48 228" strokeWidth="1.2" opacity="0.7" />
+            {/* Ink droplet just left of the nib */}
+            <circle cx="18" cy="244" r="3" fill="#a8842f" stroke="none" opacity="0.55" />
+            <circle cx="12" cy="252" r="1.5" fill="#a8842f" stroke="none" opacity="0.4" />
+          </g>
+        </svg>
 
         <div className="site-bg-grain" />
         <div className="site-bg-vignette" />
