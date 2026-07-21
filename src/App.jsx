@@ -164,43 +164,6 @@ export default function App() {
         <div className="site-bg-aurora aurora-b" />
         <div className="site-bg-aurora aurora-c" />
 
-        <svg className="site-bg-corner corner-tl" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-          <g fill="none" stroke="#c8a24b" strokeWidth="1.1" strokeLinecap="round">
-            <path d="M8 8 L8 44" opacity="0.6" />
-            <path d="M8 8 L44 8" opacity="0.6" />
-            <path d="M8 8 Q34 8, 44 20 Q56 32, 56 56" opacity="0.55" />
-            <circle cx="56" cy="56" r="3" fill="#c8a24b" stroke="none" opacity="0.7" />
-            <path d="M50 50 L56 44 L62 50 L56 56 Z" fill="#c8a24b" stroke="none" opacity="0.5" />
-          </g>
-        </svg>
-        <svg className="site-bg-corner corner-tr" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-          <g fill="none" stroke="#c8a24b" strokeWidth="1.1" strokeLinecap="round">
-            <path d="M112 8 L112 44" opacity="0.6" />
-            <path d="M112 8 L76 8" opacity="0.6" />
-            <path d="M112 8 Q86 8, 76 20 Q64 32, 64 56" opacity="0.55" />
-            <circle cx="64" cy="56" r="3" fill="#c8a24b" stroke="none" opacity="0.7" />
-            <path d="M58 50 L64 44 L70 50 L64 56 Z" fill="#c8a24b" stroke="none" opacity="0.5" />
-          </g>
-        </svg>
-        <svg className="site-bg-corner corner-bl" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-          <g fill="none" stroke="#c8a24b" strokeWidth="1.1" strokeLinecap="round">
-            <path d="M8 112 L8 76" opacity="0.6" />
-            <path d="M8 112 L44 112" opacity="0.6" />
-            <path d="M8 112 Q34 112, 44 100 Q56 88, 56 64" opacity="0.55" />
-            <circle cx="56" cy="64" r="3" fill="#c8a24b" stroke="none" opacity="0.7" />
-            <path d="M50 70 L56 64 L62 70 L56 76 Z" fill="#c8a24b" stroke="none" opacity="0.5" />
-          </g>
-        </svg>
-        <svg className="site-bg-corner corner-br" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-          <g fill="none" stroke="#c8a24b" strokeWidth="1.1" strokeLinecap="round">
-            <path d="M112 112 L112 76" opacity="0.6" />
-            <path d="M112 112 L76 112" opacity="0.6" />
-            <path d="M112 112 Q86 112, 76 100 Q64 88, 64 64" opacity="0.55" />
-            <circle cx="64" cy="64" r="3" fill="#c8a24b" stroke="none" opacity="0.7" />
-            <path d="M58 70 L64 64 L70 70 L64 76 Z" fill="#c8a24b" stroke="none" opacity="0.5" />
-          </g>
-        </svg>
-
         <div className="site-bg-constellation">
           <span className="bg-star s1">&#10022;</span>
           <span className="bg-star s2">&#10022;</span>
@@ -263,32 +226,6 @@ export default function App() {
           <text fontFamily="Inter, sans-serif" fontSize="9" letterSpacing="4" fill="#c8a24b" opacity="0.7">
             <textPath href="#seal-outer" startOffset="0">I&#8217;M ANANTH &#183;&#183;&#183; JOURNAL &#183;&#183; PHOTOGRAPHS &#183;&#183; EXPERIENCES &#183;&#183; ARTICLES &#183;&#183; VIEWS &#183;&#183;&#183;</textPath>
           </text>
-        </svg>
-
-        {/* Quill silhouette in the lower left, drawn as a single ink stroke */}
-        <svg className="site-bg-quill" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
-          <g fill="none" stroke="#c8a24b" strokeLinecap="round" strokeLinejoin="round">
-            {/* Feather spine */}
-            <path d="M40 220 C 80 180, 130 130, 190 60 Q 210 40, 226 34" strokeWidth="1.6" opacity="0.75" />
-            {/* Feather barbs (top side) */}
-            <path d="M96 174 C 110 158, 122 152, 140 152" strokeWidth="0.7" opacity="0.55" />
-            <path d="M116 154 C 130 138, 144 132, 162 132" strokeWidth="0.7" opacity="0.55" />
-            <path d="M136 134 C 150 118, 164 112, 182 112" strokeWidth="0.7" opacity="0.55" />
-            <path d="M156 114 C 170 98,  184  92, 200  92" strokeWidth="0.7" opacity="0.55" />
-            <path d="M176  94 C 188 78,  200  72, 214  72" strokeWidth="0.7" opacity="0.55" />
-            {/* Feather barbs (bottom side) */}
-            <path d="M96 174 C 110 190, 122 196, 140 196" strokeWidth="0.7" opacity="0.55" />
-            <path d="M116 154 C 130 170, 144 176, 162 176" strokeWidth="0.7" opacity="0.55" />
-            <path d="M136 134 C 150 150, 164 156, 182 156" strokeWidth="0.7" opacity="0.55" />
-            <path d="M156 114 C 170 130, 184 136, 200 136" strokeWidth="0.7" opacity="0.55" />
-            <path d="M176  94 C 188 110, 200 116, 214 116" strokeWidth="0.7" opacity="0.55" />
-            {/* Nib */}
-            <path d="M40 220 L34 232 L32 240 L28 236 Z" fill="#c8a24b" stroke="none" opacity="0.7" />
-            <path d="M40 220 L48 228" strokeWidth="1.2" opacity="0.7" />
-            {/* Ink droplet just left of the nib */}
-            <circle cx="18" cy="244" r="3" fill="#a8842f" stroke="none" opacity="0.55" />
-            <circle cx="12" cy="252" r="1.5" fill="#a8842f" stroke="none" opacity="0.4" />
-          </g>
         </svg>
 
         <div className="site-bg-grain" />

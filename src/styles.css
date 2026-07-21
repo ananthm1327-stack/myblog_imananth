@@ -395,7 +395,7 @@ html, body {
   position: absolute;
   border-radius: 50%;
   filter: blur(90px);
-  opacity: 0.55;
+  opacity: 0.28;
   will-change: transform;
 }
 .aurora-a {
@@ -423,7 +423,7 @@ html, body {
 }
 .site-bg-grain {
   position: absolute; inset: 0;
-  opacity: 0.35;
+  opacity: 0.14;
   mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.65 0 0 0 0 0.55 0 0 0 0 0.30 0 0 0 0.22 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>");
   background-size: 240px 240px;
@@ -433,37 +433,21 @@ html, body {
   background: radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(74,79,82,0.12) 100%);
 }
 
-/* --- Extra background flourish, all fixed to viewport, all pointer-events:none via .site-bg --- */
+/* --- Background flourish (all pointer-events:none via .site-bg) --- */
+/* Everything here is deliberately atmospheric, well under 30% opacity,
+   so it never competes with content for attention. The one exception is
+   the compass seal, which is intentionally prominent — see below. */
 
-/* A single faint vertical hairline about 9% from the left edge, like a
-   traditional journal margin rule. Faded out at top/bottom so it never
-   competes with the nav or footer. Desktop only. */
 .site-bg-margin-line {
   position: absolute;
   top: 0; bottom: 0;
   left: 9%;
   width: 1px;
-  background: linear-gradient(180deg, transparent 0%, rgba(200,162,75,0.24) 20%, rgba(200,162,75,0.24) 80%, transparent 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(200,162,75,0.12) 20%, rgba(200,162,75,0.12) 80%, transparent 100%);
 }
 @media (max-width: 900px) { .site-bg-margin-line { display: none; } }
 
-/* Ornate corner brackets. Bumped up so they read as actual page frame. */
-.site-bg-corner {
-  position: absolute;
-  width: 140px;
-  height: 140px;
-  opacity: 0.8;
-  filter: drop-shadow(0 2px 4px rgba(200,162,75,0.15));
-}
-.corner-tl { top: 14px;    left: 14px;    }
-.corner-tr { top: 14px;    right: 14px;   }
-.corner-bl { bottom: 14px; left: 14px;    }
-.corner-br { bottom: 14px; right: 14px;   }
-@media (max-width: 760px) {
-  .site-bg-corner { width: 78px; height: 78px; opacity: 0.55; }
-}
-
-/* Constellation — brighter, bigger, more of them. */
+/* Constellation — faint, ambient, no bright peaks. */
 .site-bg-constellation { position: absolute; inset: 0; }
 .bg-star {
   position: absolute;
@@ -471,30 +455,29 @@ html, body {
   line-height: 1;
   opacity: 0;
   animation: starTwinkle 9s ease-in-out infinite;
-  filter: drop-shadow(0 0 8px rgba(200,162,75,0.5));
 }
-.bg-star.s1  { top: 14%; left: 18%; font-size: 12px; animation-delay: 0s;   animation-duration: 11s; }
-.bg-star.s2  { top: 22%; left: 74%; font-size: 16px; animation-delay: 2.5s; animation-duration:  9s; }
-.bg-star.s3  { top: 38%; left: 6%;  font-size: 11px; animation-delay: 4s;   animation-duration: 12s; }
-.bg-star.s4  { top: 44%; left: 92%; font-size: 14px; animation-delay: 1s;   animation-duration: 10s; }
-.bg-star.s5  { top: 58%; left: 30%; font-size: 13px; animation-delay: 6s;   animation-duration: 13s; }
-.bg-star.s6  { top: 66%; left: 80%; font-size: 11px; animation-delay: 3s;   animation-duration: 11s; }
-.bg-star.s7  { top: 82%; left: 15%; font-size: 14px; animation-delay: 5.5s; animation-duration: 10s; }
-.bg-star.s8  { top: 88%; left: 62%; font-size: 12px; animation-delay: 1.5s; animation-duration: 12s; }
-.bg-star.s9  { top: 30%; left: 50%; font-size: 10px; animation-delay: 7s;   animation-duration: 14s; }
-.bg-star.s10 { top: 54%; left: 58%; font-size: 12px; animation-delay: 8.5s; animation-duration: 11s; }
-.bg-star.s11 { top: 76%; left: 48%; font-size: 15px; animation-delay: 4.5s; animation-duration: 13s; }
-.bg-star.s12 { top: 10%; left: 42%; font-size: 11px; animation-delay: 2s;   animation-duration: 12s; }
+.bg-star.s1  { top: 14%; left: 18%; font-size: 10px; animation-delay: 0s;   animation-duration: 11s; }
+.bg-star.s2  { top: 22%; left: 74%; font-size: 12px; animation-delay: 2.5s; animation-duration:  9s; }
+.bg-star.s3  { top: 38%; left: 6%;  font-size: 9px;  animation-delay: 4s;   animation-duration: 12s; }
+.bg-star.s4  { top: 44%; left: 92%; font-size: 11px; animation-delay: 1s;   animation-duration: 10s; }
+.bg-star.s5  { top: 58%; left: 30%; font-size: 10px; animation-delay: 6s;   animation-duration: 13s; }
+.bg-star.s6  { top: 66%; left: 80%; font-size: 9px;  animation-delay: 3s;   animation-duration: 11s; }
+.bg-star.s7  { top: 82%; left: 15%; font-size: 11px; animation-delay: 5.5s; animation-duration: 10s; }
+.bg-star.s8  { top: 88%; left: 62%; font-size: 10px; animation-delay: 1.5s; animation-duration: 12s; }
+.bg-star.s9  { top: 30%; left: 50%; font-size: 8px;  animation-delay: 7s;   animation-duration: 14s; }
+.bg-star.s10 { top: 54%; left: 58%; font-size: 9px;  animation-delay: 8.5s; animation-duration: 11s; }
+.bg-star.s11 { top: 76%; left: 48%; font-size: 11px; animation-delay: 4.5s; animation-duration: 13s; }
+.bg-star.s12 { top: 10%; left: 42%; font-size: 9px;  animation-delay: 2s;   animation-duration: 12s; }
 @keyframes starTwinkle {
   0%   { opacity: 0;    transform: translate3d(0, 0, 0) scale(0.85); }
-  50%  { opacity: 0.85; transform: translate3d(0, -6px, 0) scale(1); }
+  50%  { opacity: 0.35; transform: translate3d(0, -4px, 0) scale(1); }
   100% { opacity: 0;    transform: translate3d(0, 0, 0) scale(0.85); }
 }
 
-/* Giant italic serif watermark words — a writer's ambient wash. Each is
-   fixed to a viewport corner/edge so they never crash into the section
-   watermarks, hero monogram, or nav. Rotated + huge + very low-opacity
-   stroked text so they read as atmosphere, not headlines. */
+/* Italic serif watermark words — atmospheric only, not headline-loud.
+   Fewer of them and much thinner stroke than before. Placed off in the
+   viewport margins where main's max-width leaves whitespace, so they
+   never sit under readable content. */
 .site-bg-words { position: absolute; inset: 0; }
 .bg-word {
   position: absolute;
@@ -504,67 +487,65 @@ html, body {
   line-height: 1;
   white-space: nowrap;
   color: transparent;
-  -webkit-text-stroke: 1px rgba(200,162,75,0.32);
+  -webkit-text-stroke: 0.6px rgba(200,162,75,0.14);
   letter-spacing: -0.02em;
   user-select: none;
 }
-.bg-word.bw-1 { top:  6%; left: 55%; font-size: clamp(60px, 8vw, 130px); transform: rotate(-6deg); }
-.bg-word.bw-2 { top: 28%; left:  2%; font-size: clamp(60px, 9vw, 150px); transform: rotate(-14deg); }
-.bg-word.bw-3 { top: 48%; left: 60%; font-size: clamp(48px, 6vw, 96px); transform: rotate(4deg); }
-.bg-word.bw-4 { top: 68%; left:  4%; font-size: clamp(70px, 9vw, 160px); transform: rotate(-8deg); }
-.bg-word.bw-5 { top: 12%; left: -4%; font-size: clamp(60px, 8vw, 140px); transform: rotate(8deg); }
-.bg-word.bw-6 { top: 74%; left: 40%; font-size: clamp(60px, 8vw, 140px); transform: rotate(-4deg); }
-.bg-word.bw-7 { top: 40%; left: 82%; font-size: clamp(50px, 7vw, 110px); transform: rotate(12deg); }
-.bg-word.bw-8 { top: 86%; left: 70%; font-size: clamp(50px, 7vw, 120px); transform: rotate(-10deg); }
-.bg-word.bw-9 { top: 92%; left: 20%; font-size: clamp(50px, 6vw, 100px); transform: rotate(6deg); }
+.bg-word.bw-1 { top:  8%; left:  2%; font-size: clamp(50px, 7vw, 110px); transform: rotate(-14deg); }
+.bg-word.bw-2 { top: 26%; left: 78%; font-size: clamp(48px, 6vw, 96px);  transform: rotate(12deg); }
+.bg-word.bw-3 { top: 78%; left:  4%; font-size: clamp(50px, 7vw, 110px); transform: rotate(-6deg); }
+.bg-word.bw-4 { top: 92%; left: 68%; font-size: clamp(42px, 6vw, 90px);  transform: rotate(6deg); }
+/* Hide the leftover slots — nine was too many. */
+.bg-word.bw-5,
+.bg-word.bw-6,
+.bg-word.bw-7,
+.bg-word.bw-8,
+.bg-word.bw-9 { display: none; }
 @media (max-width: 760px) {
-  .bg-word { -webkit-text-stroke-width: 0.6px; }
-  .bg-word.bw-1, .bg-word.bw-5, .bg-word.bw-7, .bg-word.bw-8 { display: none; }
+  .bg-word.bw-2 { display: none; } /* keep the two on the left, drop the two on the right */
+  .bg-word.bw-4 { display: none; }
 }
 
-/* Ornate compass seal, fixed on the right, slowly rotating like a
-   turning wax stamp. Feels like the endpaper of a hardback book. */
+/* Ornate compass seal — deliberately prominent, the one strong graphic.
+   Sits at mid-right; positioning is viewport-size-aware so it only
+   occupies whitespace outside main's 1100px content column. On typical
+   desktop widths that column reaches nearly edge to edge, so the seal
+   peeks in from the edge with roughly half its width visible; on very
+   wide displays there's genuine margin space to hold the whole thing. */
 .site-bg-seal {
   position: absolute;
   width: 340px;
   height: 340px;
-  top: 42%;
-  right: -80px;
-  opacity: 0.55;
+  top: 45%;
+  right: -205px;         /* ~135px of the seal is on-screen: a proper edge peek */
+  opacity: 0.75;
   transform-origin: center;
+  transform: translateY(-50%);
   animation: sealSpin 180s linear infinite;
+  filter: drop-shadow(0 4px 12px rgba(200,162,75,0.18));
 }
 @keyframes sealSpin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from { transform: translateY(-50%) rotate(0deg); }
+  to   { transform: translateY(-50%) rotate(360deg); }
+}
+/* Only ultrawide (1920px+) has enough margin to hold the full seal
+   without overlapping main's content column. */
+@media (min-width: 1920px) {
+  .site-bg-seal { right: 40px; width: 320px; height: 320px; opacity: 0.7; }
 }
 @media (max-width: 900px) {
-  .site-bg-seal { width: 220px; height: 220px; top: 60%; right: -90px; opacity: 0.4; }
+  .site-bg-seal { width: 240px; height: 240px; right: -150px; top: 62%; opacity: 0.55; }
 }
-@media (max-width: 480px) {
+@media (max-width: 640px) {
+  .site-bg-seal { width: 200px; height: 200px; right: -120px; top: 70%; opacity: 0.5; }
+}
+@media (max-width: 380px) {
   .site-bg-seal { display: none; }
-}
-
-/* Hand-drawn quill silhouette in the lower left — a writer's mark. */
-.site-bg-quill {
-  position: absolute;
-  width: 340px;
-  height: 340px;
-  bottom: -20px;
-  left: -50px;
-  opacity: 0.6;
-  transform: rotate(-6deg);
-}
-@media (max-width: 900px) {
-  .site-bg-quill { width: 220px; height: 220px; bottom: 60px; left: -80px; opacity: 0.4; }
-}
-@media (max-width: 480px) {
-  .site-bg-quill { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .site-bg-aurora { animation: none; }
-  .bg-star        { animation: none; opacity: 0.4; }
+  .bg-star        { animation: none; opacity: 0.18; }
   .site-bg-seal   { animation: none; }
 }
 
