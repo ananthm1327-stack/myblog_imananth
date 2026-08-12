@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { getSyncStatus, pullAll } from '../lib/sync.js'
-import { isSupabaseEnabled } from '../lib/supabase.js'
+import { isFirebaseEnabled } from '../lib/firebase.js'
 import { toast } from '../lib/toast.js'
 
 // Tells "genuinely nothing published yet" apart from "the pull from the
@@ -10,7 +10,7 @@ import { toast } from '../lib/toast.js'
 export default function EmptyState({ label = 'Nothing here yet.' }) {
   const [retrying, setRetrying] = useState(false)
   const { ok, hasPulled } = getSyncStatus()
-  const showRetry = isSupabaseEnabled && hasPulled && !ok
+  const showRetry = isFirebaseEnabled && hasPulled && !ok
 
   if (!showRetry) return <div className="empty">{label}</div>
 

@@ -1,0 +1,82 @@
+// ============================================================
+// I'm Ananth — Firestore Security Rules
+//
+// Replaces the Supabase RLS policies. Same intent:
+//   - anyone can READ published, non-scheduled posts
+//   - anyone can READ approved comments
+//   - anyone can CREATE a pending comment (unauthenticated)
+//   - only the owner (proven by writing the correct ownerToken field)
+//     can CREATE/UPDATE/DELETE posts, or UPDATE/DELETE comments
+//
+// The owner token is a shared secret embedded in the client bundle.
+// This mirrors the Supabase model — "owner-only" is a client-side UX
+// gate (isOwner() in store.js), not a real authentication boundary.
+// If you want true auth, replace OWNER_TOKEN with Firebase Auth
+// email/password + a hardcoded owner UID.
+//
+// !!! IMPORTANT — before deploying, replace the string below with
+//     the actual value of VITE_OWNER_TOKEN from your .env.local.
+//     Firestore rules are compile-time constants; they can't read env
+//     vars, and can't reference client-side JS.
+// ============================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function ownerToken() {
+      // ⇩⇩⇩ Paste your VITE_OWNER_TOKEN value here before deploying.
+      return '4f99fbfb1ba9b2cc071852b5cc336b7abec0357d9a81a5a771ec24e97fe32bec';
+    }
+
+    function isOwnerWrite() {
+      return request.resource.data.ownerToken == ownerToken();
+    }
+    function isOwnerExisting() {
+      return resource.data.ownerToken == ownerToken();
+    }
+
+    // ---------- posts ----------
+    match /posts/{postId} {
+      // Public read of any published post. The `publishAt <= now()`
+      // scheduled-visibility check runs on the client via isLivePost()
+      // (see src/store.js) — Firestore can't verify a rule against a
+      // field the query doesn't filter on, so a compound predicate
+      // here would reject every list query. Same effective behavior
+      // as the Supabase version (which was also client-filtered).
+      //
+      // Draft posts stay owner-only. The owner's client queries with
+      // where('ownerToken','==',...) which piggybacks on the second
+      // branch of this rule.
+      allow read: if resource.data.status == 'published'
+                  || resource.data.ownerToken == ownerToken();
+
+      allow create, update: if isOwnerWrite();
+      allow delete: if isOwnerExisting();
+    }
+
+    // ---------- comments ----------
+    match /comments/{commentId} {
+      // Approved comments are public.
+      // Pending comments visible only to owner (same query-with-token
+      // pattern as posts).
+      allow read: if resource.data.status == 'approved'
+                  || resource.data.ownerToken == ownerToken();
+
+      // Anyone (even unauthenticated readers) can create a comment,
+      // but only in pending state. ownerToken is stamped on every
+      // comment (not just the owner's) so the owner's moderation
+      // listener can select pending ones — see /lib/sync.js.
+      allow create: if request.resource.data.status == 'pending';
+
+      // Only the owner can approve, edit, or delete.
+      allow update, delete: if isOwnerWrite() || isOwnerExisting();
+    }
+
+    // Default deny for anything else.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

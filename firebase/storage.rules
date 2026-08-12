@@ -1,0 +1,32 @@
+// ============================================================
+// I'm Ananth — Storage Security Rules
+//
+// Same "owner-only write, everyone read" model as Supabase Storage.
+//
+// !!! IMPORTANT — replace the ownerToken() return value below with
+//     your actual VITE_OWNER_TOKEN before deploying.
+// ============================================================
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function ownerToken() {
+      return '4f99fbfb1ba9b2cc071852b5cc336b7abec0357d9a81a5a771ec24e97fe32bec';
+    }
+
+    // Anything under post-images/ is publicly readable so <img src=...>
+    // works. Writes and deletes require the ownerToken to be stamped
+    // in customMetadata on the upload (see /lib/storage.js uploadImage).
+    match /post-images/{allPaths=**} {
+      allow read: if true;
+      allow write, delete: if request.resource.metadata.ownerToken == ownerToken();
+    }
+
+    // Everything else is locked.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
