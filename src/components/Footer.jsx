@@ -113,6 +113,7 @@ export default function Footer() {
               <img src="/logo.svg" alt="" className="footer-logo" />
               <span>I'm Ananth</span>
             </div>
+            <BackendStatus />
             <p className="footer-tagline">
               A quiet corner of the internet — words, photographs, and a few honest views.
               Written from wherever I happen to be.
@@ -177,8 +178,6 @@ export default function Footer() {
             Made with <span className="heart">&#9825;</span> and slow mornings
           </div>
         </div>
-
-        <BackendStatus />
       </div>
     </footer>
   )
