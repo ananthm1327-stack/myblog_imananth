@@ -3841,8 +3841,13 @@ a.ct-method:hover .ct-method-icon { background: var(--gold); color: #fff; }
   .backend-status .bs-pulse { animation: none; }
 }
 
-/* Sits inside .footer-about under the brand line, left-aligned. */
-.site-footer .footer-about .backend-status { align-self: flex-start; }
+/* Sits inside .footer-about below the socials row, left-aligned so it
+   lines up with the brand + tagline column edge. Extra top margin gives
+   it clear breathing room from the icon strip above. */
+.site-footer .footer-about .backend-status {
+  align-self: flex-start;
+  margin: 20px 0 0;
+}
 
 /* ---- Legal / policy pages ---- */
 .legal {
