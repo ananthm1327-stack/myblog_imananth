@@ -8,15 +8,24 @@
 //   2. Offline-friendly: last-known content still renders even if
 //      Firestore listeners haven't reconnected yet.
 //
-// Where Supabase used `pullAll()` + a 45s poll + realtime, Firestore
-// uses `onSnapshot`: a single listener per collection that fires
-// whenever *any* document changes, delivering just the changed docs.
-// So there is no poll, no debounce, no reconnect timer — the SDK
-// handles all of that for us. subscribeAll() sets up two listeners
-// (posts, comments) and returns an unsubscribe function.
+// Firestore's rule engine can only allow a query when the query's own
+// filters guarantee every returned doc will pass the read rule. That
+// means an unfiltered `collection('posts')` scan is rejected upfront
+// even if all current docs happen to be public — a future draft could
+// be returned, so Firestore refuses the query in advance.
+//
+// So we run TWO listeners per collection:
+//   • a "public" listener filtered to what the reader-facing rule
+//     allows (status == 'published' / status == 'approved')
+//   • an "owner" listener filtered by ownerToken (drafts, scheduled
+//     posts, pending comments — anything the owner needs to moderate)
+// Their results are merged into a single local mirror by id.
+//
+// The Firebase SDK handles reconnect / backoff / visibility natively,
+// so there is no poll, no debounce, no lifecycle wiring here.
 
 import {
-  collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc, getDocs
+  collection, query, where, onSnapshot, doc, setDoc, deleteDoc, updateDoc, getDocs
 } from 'firebase/firestore'
 import { db, isFirebaseEnabled, OWNER_TOKEN } from './firebase.js'
 import { emitDataChange } from './bus.js'
@@ -29,7 +38,6 @@ function saveLocal(section, items) {
   localStorage.setItem(lsKey(section), JSON.stringify(items))
 }
 
-// Firestore doc → the shape store.js expects.
 function fromDoc(snap) {
   const d = snap.data()
   return {
@@ -60,124 +68,206 @@ function toDoc(section, post) {
   }
 }
 
-// ---------- Sync-status API (unchanged shape from Supabase) ----------
+// ---------- Sync-status API (unchanged shape) ----------
 let lastSyncOk = true
 let hasSyncedOnce = false
 export function getSyncStatus() { return { ok: lastSyncOk, hasPulled: hasSyncedOnce } }
 
-// ---------- The initial + subscription flow ----------
-let unsubPosts = null
-let unsubComments = null
+// ---------- Merged caches from the two listeners ----------
+// Keyed by doc id. Owner cache overrides public cache when the same
+// doc appears in both (they'll be identical if published — this just
+// means owner-only drafts also make it into the mirror).
+let postsPublicCache = new Map()
+let postsOwnerCache = new Map()
+let commentsPublicCache = new Map()
+let commentsOwnerCache = new Map()
 
-// Rebuild the local mirror for a single section from a Firestore snapshot.
-function applyPostsSnapshot(snap) {
+function rebuildPostsMirror() {
+  const merged = new Map()
+  for (const [id, p] of postsPublicCache) merged.set(id, p)
+  for (const [id, p] of postsOwnerCache)  merged.set(id, p)
   const bySection = {}
   SECTION_KEYS.forEach(k => bySection[k] = [])
-  snap.forEach(d => {
-    const p = fromDoc(d)
-    const arr = bySection[p.section]
-    if (arr) arr.push(p)
-  })
+  for (const post of merged.values()) {
+    const arr = bySection[post.section]
+    if (arr) arr.push(post)
+  }
   SECTION_KEYS.forEach(section => {
     const sorted = bySection[section].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     saveLocal(section, sorted)
   })
 }
 
-function applyCommentsSnapshot(snap) {
+function rebuildCommentsMirror() {
+  const merged = new Map()
+  for (const [id, c] of commentsPublicCache) merged.set(id, c)
+  for (const [id, c] of commentsOwnerCache)  merged.set(id, c)
   const map = {}
-  snap.forEach(d => {
-    const c = d.data()
+  for (const c of merged.values()) {
     const key = `${c.section}_${c.postId}`
     if (!map[key]) map[key] = []
-    map[key].push({
-      id: d.id,
-      name: c.name,
-      body: c.body,
-      createdAt: c.createdAt,
-      status: c.status,
-      reactions: c.reactions || { heart: 0, sparkle: 0 }
-    })
-  })
+    map[key].push(c)
+  }
   localStorage.setItem('ia_comments', JSON.stringify(map))
+}
+
+// ---------- Subscriptions ----------
+let unsubs = []
+
+function subOnce(fn, label) {
+  try { return fn() }
+  catch (e) { console.warn(`[sync] ${label} subscribe threw`, e); return null }
 }
 
 export function subscribeAll() {
   if (!isFirebaseEnabled) return { ok: false, reason: 'disabled' }
-  if (unsubPosts) return { ok: true, alreadyRunning: true }
+  if (unsubs.length) return { ok: true, alreadyRunning: true }
 
-  // Posts listener — receives every published + owner-visible doc.
-  // Security rules gate what a given caller can see (public gets only
-  // published, owner-token queries can pull drafts + scheduled).
-  unsubPosts = onSnapshot(
-    collection(db, 'posts'),
+  // Public posts listener — anyone can subscribe; rule permits every
+  // returned doc because the query guarantees status == 'published'.
+  const publicPostsQ = query(collection(db, 'posts'), where('status', '==', 'published'))
+  unsubs.push(subOnce(() => onSnapshot(
+    publicPostsQ,
     (snap) => {
-      applyPostsSnapshot(snap)
-      hasSyncedOnce = true
-      lastSyncOk = true
+      postsPublicCache = new Map()
+      snap.forEach(d => postsPublicCache.set(d.id, fromDoc(d)))
+      rebuildPostsMirror()
+      hasSyncedOnce = true; lastSyncOk = true
       emitDataChange()
     },
     (err) => {
-      console.warn('[sync] posts listener error', err)
-      hasSyncedOnce = true
-      lastSyncOk = false
+      console.warn('[sync] public posts listener error', err)
+      hasSyncedOnce = true; lastSyncOk = false
       emitDataChange()
     }
-  )
+  ), 'public posts'))
 
-  // Comments listener — approved for everyone, plus owner-token
-  // pending for the moderation queue.
-  unsubComments = onSnapshot(
-    collection(db, 'comments'),
+  // Owner posts listener — filtered by ownerToken so the rule can
+  // verify. Returns drafts + scheduled + everything else the owner
+  // has authored. The token is embedded in the bundle already (same
+  // shared-secret model as Supabase), so this listener is present in
+  // every reader's session; the UI gates draft visibility client-side
+  // via isOwner() in store.js.
+  if (OWNER_TOKEN) {
+    const ownerPostsQ = query(collection(db, 'posts'), where('ownerToken', '==', OWNER_TOKEN))
+    unsubs.push(subOnce(() => onSnapshot(
+      ownerPostsQ,
+      (snap) => {
+        postsOwnerCache = new Map()
+        snap.forEach(d => postsOwnerCache.set(d.id, fromDoc(d)))
+        rebuildPostsMirror()
+        emitDataChange()
+      },
+      (err) => { console.warn('[sync] owner posts listener error', err) }
+    ), 'owner posts'))
+  }
+
+  // Public comments listener — approved only, so any reader's client
+  // can render the thread on a post detail page.
+  const publicCommentsQ = query(collection(db, 'comments'), where('status', '==', 'approved'))
+  unsubs.push(subOnce(() => onSnapshot(
+    publicCommentsQ,
     (snap) => {
-      applyCommentsSnapshot(snap)
+      commentsPublicCache = new Map()
+      snap.forEach(d => {
+        const c = d.data()
+        commentsPublicCache.set(d.id, {
+          id: d.id, section: c.section, postId: c.postId, name: c.name,
+          body: c.body, createdAt: c.createdAt, status: c.status,
+          reactions: c.reactions || { heart: 0, sparkle: 0 }
+        })
+      })
+      rebuildCommentsMirror()
       emitDataChange()
     },
-    (err) => {
-      console.warn('[sync] comments listener error', err)
-    }
-  )
+    (err) => { console.warn('[sync] public comments listener error', err) }
+  ), 'public comments'))
+
+  // Owner comments listener — includes pending for the moderation queue.
+  if (OWNER_TOKEN) {
+    const ownerCommentsQ = query(collection(db, 'comments'), where('ownerToken', '==', OWNER_TOKEN))
+    unsubs.push(subOnce(() => onSnapshot(
+      ownerCommentsQ,
+      (snap) => {
+        commentsOwnerCache = new Map()
+        snap.forEach(d => {
+          const c = d.data()
+          commentsOwnerCache.set(d.id, {
+            id: d.id, section: c.section, postId: c.postId, name: c.name,
+            body: c.body, createdAt: c.createdAt, status: c.status,
+            reactions: c.reactions || { heart: 0, sparkle: 0 }
+          })
+        })
+        rebuildCommentsMirror()
+        emitDataChange()
+      },
+      (err) => { console.warn('[sync] owner comments listener error', err) }
+    ), 'owner comments'))
+  }
 
   return { ok: true }
 }
 
 export function unsubscribeAll() {
-  if (unsubPosts) { unsubPosts(); unsubPosts = null }
-  if (unsubComments) { unsubComments(); unsubComments = null }
+  unsubs.forEach(u => { if (typeof u === 'function') u() })
+  unsubs = []
 }
 
-// Manual refresh (used by EmptyState's retry button when a listener has
-// failed and the user wants to force a fresh fetch).
+// Manual refresh (EmptyState "retry" button when a listener errored).
+// getDocs mirrors the split-query pattern the listeners use.
 export async function pullAll() {
   if (!isFirebaseEnabled) return { ok: false, reason: 'disabled' }
   try {
-    const [postsSnap, commentsSnap] = await Promise.all([
-      getDocs(collection(db, 'posts')),
-      getDocs(collection(db, 'comments'))
-    ])
-    applyPostsSnapshot(postsSnap)
-    applyCommentsSnapshot(commentsSnap)
-    hasSyncedOnce = true
-    lastSyncOk = true
+    const publicPosts = await getDocs(query(collection(db, 'posts'), where('status', '==', 'published')))
+    postsPublicCache = new Map()
+    publicPosts.forEach(d => postsPublicCache.set(d.id, fromDoc(d)))
+
+    const publicComments = await getDocs(query(collection(db, 'comments'), where('status', '==', 'approved')))
+    commentsPublicCache = new Map()
+    publicComments.forEach(d => {
+      const c = d.data()
+      commentsPublicCache.set(d.id, {
+        id: d.id, section: c.section, postId: c.postId, name: c.name,
+        body: c.body, createdAt: c.createdAt, status: c.status,
+        reactions: c.reactions || { heart: 0, sparkle: 0 }
+      })
+    })
+
+    if (OWNER_TOKEN) {
+      const ownerPosts = await getDocs(query(collection(db, 'posts'), where('ownerToken', '==', OWNER_TOKEN)))
+      postsOwnerCache = new Map()
+      ownerPosts.forEach(d => postsOwnerCache.set(d.id, fromDoc(d)))
+      const ownerComments = await getDocs(query(collection(db, 'comments'), where('ownerToken', '==', OWNER_TOKEN)))
+      commentsOwnerCache = new Map()
+      ownerComments.forEach(d => {
+        const c = d.data()
+        commentsOwnerCache.set(d.id, {
+          id: d.id, section: c.section, postId: c.postId, name: c.name,
+          body: c.body, createdAt: c.createdAt, status: c.status,
+          reactions: c.reactions || { heart: 0, sparkle: 0 }
+        })
+      })
+    }
+
+    rebuildPostsMirror()
+    rebuildCommentsMirror()
+    hasSyncedOnce = true; lastSyncOk = true
     emitDataChange()
-    return { ok: true, postCount: postsSnap.size, commentCount: commentsSnap.size }
+    const totalPosts = new Set([...postsPublicCache.keys(), ...postsOwnerCache.keys()]).size
+    const totalComments = new Set([...commentsPublicCache.keys(), ...commentsOwnerCache.keys()]).size
+    return { ok: true, postCount: totalPosts, commentCount: totalComments }
   } catch (e) {
     console.warn('[sync] pull failed', e)
-    hasSyncedOnce = true
-    lastSyncOk = false
+    hasSyncedOnce = true; lastSyncOk = false
     emitDataChange()
     return { ok: false, reason: e.message }
   }
 }
 
-// ---------- Kept for API compatibility with old call sites ----------
+// ---------- Kept for API compatibility ----------
 export function subscribeRealtime() { subscribeAll() }
 export function startPolling() { /* no-op — onSnapshot handles this natively */ }
-export function subscribeLifecycle() {
-  // Firestore SDK re-establishes listeners on network reconnect and tab
-  // visibility change automatically; nothing for us to do here. Left as
-  // a no-op so main.jsx's import chain doesn't break.
-}
+export function subscribeLifecycle() { /* no-op — SDK handles it */ }
 
 // ---------- PUSH (fire-and-forget with visible failure) ----------
 function warnNotSynced(message) { toast.error(message, { duration: 6000 }) }
@@ -217,9 +307,6 @@ export function pushComment(section, postId, comment) {
     createdAt: comment.createdAt,
     status: comment.status || 'pending',
     reactions: comment.reactions || { heart: 0, sparkle: 0 },
-    // Stamped on every comment (not just the owner's) so the owner's
-    // moderation listener can select pending rows. Same rationale as
-    // the Supabase schema note.
     ownerToken: OWNER_TOKEN
   }
   setDoc(doc(db, 'comments', comment.id), payload)

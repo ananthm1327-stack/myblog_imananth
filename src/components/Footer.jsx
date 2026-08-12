@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from '../lib/toast.js'
+import BackendStatus from './BackendStatus.jsx'
 
 const OWNER_EMAIL = 'ananth.machiraju@outlook.com'
 const SUBSCRIBE_ENDPOINT = `https://formsubmit.co/${OWNER_EMAIL}`
@@ -176,6 +177,8 @@ export default function Footer() {
             Made with <span className="heart">&#9825;</span> and slow mornings
           </div>
         </div>
+
+        <BackendStatus />
       </div>
     </footer>
   )
