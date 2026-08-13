@@ -11,8 +11,34 @@ import { siteJsonLd } from '../lib/jsonld.js'
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V']
 
+// Per-section label for the hero CTA — makes "Read the latest journal
+// entry" sound natural instead of the awkward pluralised default.
+const LATEST_LABEL = {
+  journal:     'Read the latest entry',
+  photos:      'See the latest photo',
+  experiences: 'Read the latest experience',
+  articles:    'Read the latest article',
+  views:       'Read the latest view'
+}
+
 export default function Home({ sections }) {
   useLiveData()
+
+  // Pick the single most recent published post across every section so
+  // the hero CTA always points at the freshest thing on the site. When
+  // there's nothing published (fresh install, or every post is a
+  // draft), fall back to the Journal listing so the button still works.
+  const owner = isOwner()
+  const latest = sections
+    .flatMap(s => load(s.key)
+      .filter(p => owner || isLivePost(p))
+      .map(p => ({ post: p, section: s })))
+    .sort((a, b) => new Date(b.post.createdAt) - new Date(a.post.createdAt))[0]
+
+  const heroCta = latest
+    ? { to: `/${latest.section.key}/${latest.post.id}`, label: LATEST_LABEL[latest.section.key] || 'Read the latest post' }
+    : { to: '/journal', label: 'Read the Journal' }
+
   return (
     <>
       <section className="hero">
@@ -34,7 +60,7 @@ export default function Home({ sections }) {
             <em>experiences</em>, <em>articles</em>, and honest <em>views</em> on the world.
           </p>
           <div className="hero-ctas">
-            <Link to="/journal" className="btn hero-btn">Read the Journal</Link>
+            <Link to={heroCta.to} className="btn hero-btn">{heroCta.label}</Link>
             <Link to="/contact" className="hero-link">Say hello &rarr;</Link>
           </div>
         </div>
