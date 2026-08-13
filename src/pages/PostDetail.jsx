@@ -4,6 +4,7 @@ import { getPost, deletePost, isOwner, formatDate, isLivePost, isScheduled, isBo
 import Comments from '../components/Comments.jsx'
 import { Page } from '../components/Decor.jsx'
 import Meta from '../components/Meta.jsx'
+import ShareButton from '../components/ShareButton.jsx'
 import { postJsonLd } from '../lib/jsonld.js'
 import { sanitize, stripHtml } from '../lib/sanitize.js'
 import { useLiveData } from '../lib/bus.js'
@@ -73,21 +74,24 @@ export default function PostDetail({ sectionKey, label }) {
     <div className="post-detail">
       <div className="post-top-row">
         <Link to={`/${sectionKey}`} className="back-link">&larr; Back to {label}</Link>
-        <button
-          className={`bookmark-btn ${bookmarked ? 'on' : ''}`}
-          onClick={() => {
-            const next = toggleBookmark(sectionKey, id)
-            setBookmarked(next)
-            toast.info(next ? 'Saved to bookmarks.' : 'Removed from bookmarks.')
-          }}
-          aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark this post'}
-          title={bookmarked ? 'Bookmarked — click to remove' : 'Save for later'}
-        >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill={bookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6 4h12v17l-6-4-6 4V4z" />
-          </svg>
-          <span>{bookmarked ? 'Saved' : 'Save'}</span>
-        </button>
+        <div className="post-top-actions">
+          <ShareButton title={stripHtml(post.title)} path={postPath} />
+          <button
+            className={`bookmark-btn ${bookmarked ? 'on' : ''}`}
+            onClick={() => {
+              const next = toggleBookmark(sectionKey, id)
+              setBookmarked(next)
+              toast.info(next ? 'Saved to bookmarks.' : 'Removed from bookmarks.')
+            }}
+            aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark this post'}
+            title={bookmarked ? 'Bookmarked — click to remove' : 'Save for later'}
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" fill={bookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 4h12v17l-6-4-6 4V4z" />
+            </svg>
+            <span>{bookmarked ? 'Saved' : 'Save'}</span>
+          </button>
+        </div>
       </div>
       {post.status === 'draft' && (
         <div className="draft-banner">Draft — visible only to you until you publish it.</div>

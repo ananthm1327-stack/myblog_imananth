@@ -1671,7 +1671,130 @@ main {
   box-shadow: 0 4px 12px rgba(200, 162, 75, 0.28);
 }
 
-/* -------- COMMENT REACTIONS -------- */
+/* Group Save + Share to the right of the back-link on post detail. */
+.post-top-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* -------- SHARE BUTTON + POPOVER -------- */
+.share-wrap { position: relative; }
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold-deep);
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .2s, color .2s, box-shadow .2s;
+  border-radius: 999px;
+}
+.share-btn:hover { background: rgba(200, 162, 75, 0.1); }
+.share-btn.open {
+  background: var(--gold);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(200, 162, 75, 0.28);
+}
+
+.share-pop {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 60;
+  width: min(320px, 92vw);
+  padding: 16px 16px 12px;
+  background: #fff;
+  border: 1px solid rgba(200, 162, 75, 0.32);
+  box-shadow: 0 20px 50px rgba(74, 79, 82, 0.18), 0 2px 8px rgba(200, 162, 75, 0.12);
+  border-radius: 4px;
+  animation: sharePopIn .2s ease-out both;
+}
+@keyframes sharePopIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.share-pop-eyebrow {
+  font-family: 'Inter', sans-serif;
+  color: var(--gold);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.share-link-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.share-link-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(200, 162, 75, 0.28);
+  background: rgba(200, 162, 75, 0.04);
+  color: var(--titanium-dark);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 12px;
+  outline: none;
+}
+.share-link-row input:focus { border-color: var(--gold); background: #fff; }
+.share-copy-btn {
+  padding: 8px 14px;
+  border: none;
+  background: var(--gold);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .2s;
+  flex-shrink: 0;
+}
+.share-copy-btn:hover { background: var(--gold-deep); }
+
+.share-targets {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+.share-target {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  color: var(--titanium-dark) !important;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  transition: background .2s, color .2s, border-color .2s;
+}
+.share-target svg { color: var(--gold-deep); transition: color .2s; }
+.share-target:hover {
+  background: rgba(200, 162, 75, 0.08);
+  color: var(--gold-deep) !important;
+  border-color: rgba(200, 162, 75, 0.3);
+}
+.share-target:hover svg { color: var(--gold); }
+
+@media (max-width: 480px) {
+  .share-btn span { display: none; }
+  .share-btn { padding: 8px 10px; min-width: 40px; justify-content: center; }
+  .share-pop { right: -20px; width: min(300px, 90vw); }
+  .share-targets { grid-template-columns: repeat(5, 1fr); }
+}
 .reactions {
   display: flex;
   gap: 8px;
